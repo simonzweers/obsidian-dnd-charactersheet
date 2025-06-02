@@ -1,28 +1,22 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { CharacterSheetView, VIEW_TYPE_EXAMPLE } from 'Mainview';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
 
-interface MyPluginSettings {
+interface CharacterSheetSettings {
 	mySetting: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: CharacterSheetSettings = {
 	mySetting: 'default'
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class CharacterSheet extends Plugin {
+	settings: CharacterSheetSettings;
 
 	async onload() {
 		await this.loadSettings();
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'DnD Character Sheet Tool', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('Hello World');
-		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
@@ -76,6 +70,19 @@ export default class MyPlugin extends Plugin {
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+
+		this.registerView(
+			VIEW_TYPE_EXAMPLE,
+			(leaf) => new CharacterSheetView(leaf)
+		);
+		// This creates an icon in the left ribbon.
+		const ribbonIconEl = this.addRibbonIcon('dice', 'DnD Character Sheet Tool', (evt: MouseEvent) => {
+			// Called when the user clicks the icon.
+			new Notice('Hello World');
+			this.activateView();
+		});
+		// Perform additional things with the ribbon
+		ribbonIconEl.addClass('my-plugin-ribbon-class');
 	}
 
 	onunload() {
@@ -88,6 +95,21 @@ export default class MyPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	async activateView() {
+		const { workspace } = this.app;
+
+		let leaf: WorkspaceLeaf | null = null;
+		const leaves = workspace.getLeavesOfType(VIEW_TYPE_EXAMPLE);
+
+		if (leaves.length > 0 ) {
+			leaf = leaves[0];
+		} else {
+			leaf = workspace.getRightLeaf(false);
+			await leaf?.setViewState({type: VIEW_TYPE_EXAMPLE, active: true});
+		}
+		workspace.revealLeaf(leaf);
 	}
 }
 
@@ -108,9 +130,9 @@ class SampleModal extends Modal {
 }
 
 class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+	plugin: CharacterSheet;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: CharacterSheet) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
