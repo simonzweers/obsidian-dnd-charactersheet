@@ -6,6 +6,5 @@
 	"description": "This is a plugin that allows you to view charactersheets",
 	"author": "Simon Zweers",
 	"authorUrl": "https://github.com/simonzweers",
-	"fundingUrl": "https://github.com/simonzweers",
-	"isDesktopOnly": false
+	"isDesktopOnly": true
 }
