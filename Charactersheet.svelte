@@ -668,7 +668,7 @@
         </li>
       {/each}
     </ul>
-    <div class="stat-additem-row">
+    <div class="add-listitem-row">
       <input
         class="text-input"
         type="text"
@@ -715,7 +715,7 @@
       {/each}
     </ul>
 
-    <div class="stat-additem-row">
+    <div class="add-listitem-row">
       <input
         class="text-input"
         type="text"
@@ -951,6 +951,7 @@
     display: flex;
     align-items: left;
     text-align: left;
+    gap: 6px;
   }
 
   .stat-row span {
