@@ -35,6 +35,7 @@ Below you can see an example of the layout with a simple character.
 - Add the ability to view and edit Race
 - Figure out how to provide build of 
 - Put Currency and inventory side by side
+- Fix some text-input not being able to be submitted with "Enter"
 
 <!-- # Obsidian Sample Plugin
 
