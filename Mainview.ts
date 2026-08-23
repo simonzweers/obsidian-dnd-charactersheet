@@ -34,6 +34,15 @@ export class CharacterSheetView extends ItemView {
       })
     )
 
+	this.registerEvent(
+		this.app.vault.on("rename", (file, oldPath) => {
+			new Notice("File Renamed")
+			if (file.path === this.app.workspace.getActiveFile()?.path) {
+				this.refresh();
+			};
+		})
+	)
+
     this.refresh();
   }
 
@@ -102,7 +111,7 @@ export class CharacterSheetView extends ItemView {
       props: {
         app: this.app,
         file,
-        char_name: frontmatter.name ?? "Unnamed",
+        char_name: file.basename,
         char_class: frontmatter.class ?? "",
         char_level: frontmatter.level ?? 1,
         char_background: frontmatter.background ?? "No Background",
