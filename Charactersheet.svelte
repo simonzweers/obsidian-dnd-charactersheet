@@ -190,6 +190,7 @@
 
   <!-- HP -->
   <div class="hp-block">
+    <h2>HP</h2>
     <label>
       HP
       <input
