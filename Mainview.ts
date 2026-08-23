@@ -8,7 +8,7 @@ import {mount, unmount} from 'svelte'
 export const VIEW_TYPE_CHARACTERSHEET = 'dnd-charactersheet';
 
 export class CharacterSheetView extends ItemView {
-  private component: Charactersheet | null = null;
+  private component: ReturnType<typeof mount> | null = null;
   private currentFile: TFile | null = null;
 
   constructor(leaf: WorkspaceLeaf) {
