@@ -81,11 +81,18 @@ export class CharacterSheetView extends ItemView {
     const char_attacks: Attack[] = frontmatter.attacks ?? [];
     const char_traits: string[] = frontmatter.traits ?? [];
     const char_proficiencies: string[] = frontmatter.proficiencies ?? [];
+    const char_spells = {
+      cantrips: [],
+      ...(frontmatter.spells ?? {}),
+    };
 
     console.log(char_currency)
     console.log(char_inventory)
     console.log(char_attacks)
     console.log(char_traits)
+    console.log(char_proficiencies)
+    console.log(char_spells)
+    
 
     // Attach the Svelte component to the ItemViews content element and provide the needed props.
     this.component = mount(Charactersheet, {
@@ -109,6 +116,7 @@ export class CharacterSheetView extends ItemView {
         char_attacks,
         char_traits,
         char_proficiencies,
+        char_spells,
       }
     });
   }

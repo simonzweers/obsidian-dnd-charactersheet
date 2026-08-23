@@ -7,6 +7,23 @@
     damage: string;
     damage_type: string;
   }
+  interface Spell {
+    name: string;
+    link: string;
+    prepared?: boolean;
+  }
+
+  interface SpellLevel {
+    total_slots: number;
+    slots_expended: number;
+    learned: Spell[];
+  }
+
+  interface CharSpells {
+    cantrips: Spell[];
+    [levelKey: string]: SpellLevel | Spell[];
+  }
+
   export let app: App;
   export let file: TFile;
   export let char_name: string;
@@ -25,6 +42,7 @@
   export let char_attacks: Attack[];
   export let char_traits: string[];
   export let char_proficiencies: string[];
+  export let char_spells: CharSpells;
   // export let frontmatter: Record<string, any>;
 
   function getAbilityModifier(score: number) {
@@ -61,6 +79,13 @@
   let newItemName = "";
   let newTrait = "";
   let newProficiency = "";
+
+  $: spellLevelKeys = Object.keys(char_spells)
+    .filter((k) => k !== "cantrips")
+    .sort((a, b) => parseInt(a.replace("lvl", "")) - parseInt(b.replace("lvl", "")));
+
+  let newCantripName = "";
+  let newSpellNames: Record<string, string> = {}; // keyed by levelKey
 
   async function updateLevel(newLevel: number) {
     char_level = newLevel;
@@ -295,6 +320,165 @@
     await app.fileManager.processFrontMatter(file, (frontmatter) => {
       if (!frontmatter.proficiencies) frontmatter.proficiencies = [];
       frontmatter.proficiencies.push(item);
+    });
+  }
+
+  // --- Prepare toggle (leveled spells only) ---
+  async function toggleSpellPrepared(levelKey: string, index: number) {
+    const level = char_spells[levelKey] as SpellLevel;
+    const updatedLearned = level.learned.map((s, i) =>
+      i === index ? { ...s, prepared: !s.prepared } : s
+    );
+    char_spells = { ...char_spells, [levelKey]: { ...level, learned: updatedLearned } };
+
+    await app.fileManager.processFrontMatter(file, (fm) => {
+      if (!fm.spells?.[levelKey]?.learned) return;
+      fm.spells[levelKey].learned[index].prepared = updatedLearned[index].prepared;
+    });
+  }
+
+  // --- Clipboard: paste link into a spell ---
+  async function pasteSpellLink(levelKey: string, index: number) {
+    let text: string;
+    try {
+      text = await navigator.clipboard.readText();
+    } catch (err) {
+      new Notice("Couldn't read from clipboard");
+      console.log(err)
+      return;
+    }
+
+    if (levelKey === "cantrips") {
+      const updated = char_spells.cantrips.map((s, i) => (i === index ? { ...s, link: text } : s));
+      char_spells = { ...char_spells, cantrips: updated };
+
+      await app.fileManager.processFrontMatter(file, (fm) => {
+        if (!fm.spells?.cantrips) return;
+        fm.spells.cantrips[index].link = text;
+      });
+    } else {
+      const level = char_spells[levelKey] as SpellLevel;
+      const updatedLearned = level.learned.map((s, i) => (i === index ? { ...s, link: text } : s));
+      char_spells = { ...char_spells, [levelKey]: { ...level, learned: updatedLearned } };
+
+      await app.fileManager.processFrontMatter(file, (fm) => {
+        if (!fm.spells?.[levelKey]?.learned) return;
+        fm.spells[levelKey].learned[index].link = text;
+      });
+    }
+
+    new Notice("Pasted link");
+  }
+
+  // --- Clipboard: copy link from a spell ---
+  async function copySpellLink(levelKey: string, index: number) {
+    const spell =
+      levelKey === "cantrips"
+        ? char_spells.cantrips[index]
+        : (char_spells[levelKey] as SpellLevel).learned[index];
+
+    if (!spell.link) {
+      new Notice("This spell has no link set");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(spell.link);
+      new Notice("Copied link to clipboard");
+    } catch (err) {
+      new Notice("Couldn't write to clipboard");
+    }
+  }
+
+  // --- Move within its own level/cantrip list ---
+  async function moveSpellUp(levelKey: string, index: number) {
+    if (index === 0) return;
+
+    if (levelKey === "cantrips") {
+      const updated = [...char_spells.cantrips];
+      [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+      char_spells = { ...char_spells, cantrips: updated };
+
+      await app.fileManager.processFrontMatter(file, (fm) => {
+        if (!fm.spells?.cantrips) return;
+        const arr = fm.spells.cantrips;
+        [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
+      });
+    } else {
+      const level = char_spells[levelKey] as SpellLevel;
+      const updatedLearned = [...level.learned];
+      [updatedLearned[index - 1], updatedLearned[index]] = [updatedLearned[index], updatedLearned[index - 1]];
+      char_spells = { ...char_spells, [levelKey]: { ...level, learned: updatedLearned } };
+
+      await app.fileManager.processFrontMatter(file, (fm) => {
+        if (!fm.spells?.[levelKey]?.learned) return;
+        const arr = fm.spells[levelKey].learned;
+        [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
+      });
+    }
+  }
+
+  // --- Remove ---
+  async function removeSpell(levelKey: string, index: number) {
+    if (levelKey === "cantrips") {
+      char_spells = { ...char_spells, cantrips: char_spells.cantrips.filter((_, i) => i !== index) };
+
+      await app.fileManager.processFrontMatter(file, (fm) => {
+        if (!fm.spells?.cantrips) return;
+        fm.spells.cantrips.splice(index, 1);
+      });
+    } else {
+      const level = char_spells[levelKey] as SpellLevel;
+      const updatedLearned = level.learned.filter((_, i) => i !== index);
+      char_spells = { ...char_spells, [levelKey]: { ...level, learned: updatedLearned } };
+
+      await app.fileManager.processFrontMatter(file, (fm) => {
+        if (!fm.spells?.[levelKey]?.learned) return;
+        fm.spells[levelKey].learned.splice(index, 1);
+      });
+    }
+  }
+
+  // --- Add new ---
+  async function addCantrip() {
+    const name = newCantripName.trim();
+    if (!name) return;
+
+    const spell: Spell = { name, link: "" };
+    char_spells = { ...char_spells, cantrips: [...char_spells.cantrips, spell] };
+    newCantripName = "";
+
+    await app.fileManager.processFrontMatter(file, (fm) => {
+      if (!fm.spells) fm.spells = {};
+      if (!fm.spells.cantrips) fm.spells.cantrips = [];
+      fm.spells.cantrips.push(spell);
+    });
+  }
+
+  async function addSpell(levelKey: string) {
+    const name = (newSpellNames[levelKey] ?? "").trim();
+    if (!name) return;
+
+    const spell: Spell = { name, prepared: false, link: "" };
+    const level = char_spells[levelKey] as SpellLevel;
+    char_spells = { ...char_spells, [levelKey]: { ...level, learned: [...level.learned, spell] } };
+    newSpellNames = { ...newSpellNames, [levelKey]: "" };
+
+    await app.fileManager.processFrontMatter(file, (fm) => {
+      if (!fm.spells?.[levelKey]) return;
+      if (!fm.spells[levelKey].learned) fm.spells[levelKey].learned = [];
+      fm.spells[levelKey].learned.push(spell);
+    });
+  }
+
+  // --- Slot counters ---
+  async function updateSlots(levelKey: string, field: "total_slots" | "slots_expended", value: number) {
+    const level = char_spells[levelKey] as SpellLevel;
+    char_spells = { ...char_spells, [levelKey]: { ...level, [field]: value } };
+
+    await app.fileManager.processFrontMatter(file, (fm) => {
+      if (!fm.spells?.[levelKey]) return;
+      fm.spells[levelKey][field] = value;
     });
   }
 
@@ -624,6 +808,85 @@
     </div>
   </div>
 
+  <!-- SPELLS -->
+  <div>
+    <h2>Spells</h2>
+
+    <!-- CANTRIPS -->
+    <h3>Cantrips</h3>
+    <ul class="spell-list">
+      {#each char_spells.cantrips as cantrip, index}
+        <li class="spell-row">
+          <span class="spell-name">{cantrip.name}</span>
+          <div class="spell-actions">
+            <button class="icon-btn" title="Paste link" on:click={() => pasteSpellLink("cantrips", index)}>📋</button>
+            <button class="icon-btn" title="Copy link" on:click={() => copySpellLink("cantrips", index)}>🔗</button>
+            <button class="icon-btn" title="Move up" disabled={index === 0} on:click={() => moveSpellUp("cantrips", index)}>↑</button>
+            <button class="icon-btn" title="Remove" on:click={() => removeSpell("cantrips", index)}>✕</button>
+          </div>
+        </li>
+      {/each}
+    </ul>
+  </div>
+
+  <!-- LEVELED SPELLS -->
+  {#each spellLevelKeys as levelKey}
+    {@const level = char_spells[levelKey]}
+    <h3>Level {levelKey.replace("lvl", "")}</h3>
+
+    <div class="slots-row">
+      <label class="stat-row">
+        <span>Total slots</span>
+        <input
+          class="num-input"
+          type="number"
+          value={level.total_slots}
+          on:change={(e) => updateSlots(levelKey, "total_slots", Number(e.currentTarget.value))}
+        />
+      </label>
+      <label class="stat-row">
+        <span>Expended</span>
+        <input
+          class="num-input"
+          type="number"
+          value={level.slots_expended}
+          on:change={(e) => updateSlots(levelKey, "slots_expended", Number(e.currentTarget.value))}
+        />
+      </label>
+    </div>
+
+    <ul class="spell-list">
+      {#each level.learned as spell, index}
+      <li class="spell-row">
+        <input
+          type="checkbox"
+          title="Prepared"
+          checked={spell.prepared ?? false}
+          on:change={() => toggleSpellPrepared(levelKey, index)}
+        />
+        <span class="spell-name">{spell.name}</span>
+        <div class="spell-actions">
+            <button class="icon-btn" title="Paste link" on:click={() => pasteSpellLink(levelKey, index)}>📋</button>
+            <button class="icon-btn" title="Copy link" on:click={() => copySpellLink(levelKey, index)}>🔗</button>
+            <button class="icon-btn" disabled={index === 0} title="Move up" on:click={() => moveSpellUp(levelKey, index)}>↑</button>
+            <button class="icon-btn" title="Remove" on:click={() => removeSpell(levelKey, index)}>✕</button>
+        </div>
+      </li>
+      {/each}
+    </ul>
+
+    <div class="spell-row">
+      <input
+        class="text-input"
+        type="text"
+        placeholder="New Spell"
+        bind:value={newSpellNames[levelKey]}
+        on:keydown={(e) => e.key === "Enter" && addSpell(levelKey)}
+      />
+      <button on:click={() => addSpell(levelKey)}>Add</button>
+    </div>
+  {/each}
+
 </div>
 
 <style>
@@ -749,5 +1012,34 @@
 
   .text-input.small {
     width: 60px !important;
+  }
+
+  .spell-list {
+    list-style: none;
+    padding: 0;
+    margin: 4px 0;
+  }
+
+  .spell-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+  }
+
+  .spell-name {
+    flex: 1;
+  }
+
+  .spell-actions {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+  }
+
+  .slots-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 4px;
   }
 </style>
