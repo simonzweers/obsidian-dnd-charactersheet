@@ -10,6 +10,7 @@
   export let char_hp: Record<string, number>;
   export let char_proficiency_bonus: number;
   export let char_skills: Record<string, boolean>;
+  export let char_saving_throws: Record<string, boolean>
   // export let frontmatter: Record<string, any>;
   let count = 0;
 
@@ -69,6 +70,7 @@
   async function updateAbility(ability: string, level: number) {
     char_abilities = { ...char_abilities, [ability]: level };
     await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.abilities) frontmatter.abilities = {};
       frontmatter.abilities = char_abilities;
     })
   }
@@ -77,9 +79,18 @@
     char_skills = { ...char_skills, [skill]: proficiency };
 
     await app.fileManager.processFrontMatter(file, (frontmatter) => {
-        if (!frontmatter.skills) frontmatter.skills = {};
-        frontmatter.skills[skill] = proficiency;
+      if (!frontmatter.skills) frontmatter.skills = {};
+      frontmatter.skills[skill] = proficiency;
     });
+  }
+
+  async function updateSavingThrow(ability: string, proficiency: boolean) {
+    char_saving_throws = { ...char_saving_throws, [ability]: proficiency};
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.saving_throws) frontmatter.saving_throws = {};
+      frontmatter.saving_throws = char_saving_throws;
+    })
   }
 
   async function updateHP(hpType: "current" | "max" | "temp", newHP: number) {
@@ -141,6 +152,7 @@
 
   <!-- SKILLS -->
   <div>
+    <h2>Skills</h2>
     {#each skillKeys as {skill, ability}}
       <div class="skill-box">
         <input
@@ -159,6 +171,22 @@
   </div>
 
   <!-- SAVING THROWS -->
+  <div>
+    <h2>Saving Throws</h2>
+    {#each abilityKeys as key}
+    <div class="skill-box">
+      <input
+        id={key}
+        type="checkbox"
+        checked={char_saving_throws[key] ?? false}
+        value={char_saving_throws[key]}
+        on:change={(e) => updateSavingThrow(key, Boolean(e.currentTarget.checked))}
+        />
+        <span class="mod">{formatModifier(getSkillModifier(getAbilityModifier(char_abilities[key]), char_saving_throws[key], char_proficiency_bonus))}</span>
+        <label for={key}>{key.toUpperCase()}</label>
+    </div>
+    {/each}
+  </div>
 
   <!-- HP -->
   <div class="hp-block">
