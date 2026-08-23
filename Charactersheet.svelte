@@ -45,6 +45,7 @@
   export let char_traits: string[];
   export let char_proficiencies: string[];
   export let char_spells: CharSpells;
+  export let char_spellcasting: string;
   // export let frontmatter: Record<string, any>;
 
   function getAbilityModifier(score: number) {
@@ -494,6 +495,23 @@
     });
   }
 
+  async function updateSpellcasting(newSpellcasting: string) {
+    char_spellcasting = newSpellcasting;
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.spellcasting) frontmatter.spellcasting = {}
+      frontmatter.spellcasting = newSpellcasting;
+    })
+  }
+
+  function getSpellsaveDC(proficiencyBonus: number, scAbility: string) {
+    let spellSaveDC = 8 + proficiencyBonus + getAbilityModifier(char_abilities[scAbility]);
+    return spellSaveDC;
+  }
+
+  function getSpellAttackBonus(proficiencyBonus: number, scAbility: string) {
+    let spellAttackBonus = proficiencyBonus + getAbilityModifier(char_abilities[scAbility]);
+    return spellAttackBonus;
+  }
 </script>
 
 <div class="sheet-container">
@@ -823,6 +841,25 @@
   <!-- SPELLS -->
   <div>
     <h2>Spells</h2>
+    
+    <div class="sc-extra">
+      <div class="sc-extra-item">
+        <span>Spellcasting Ability</span>
+        <select id="sc-menu" name="sc-menu" on:change={(e) => updateSpellcasting(e.currentTarget.value)}>
+          <option value="int">INT</option>
+          <option value="wis">WIS</option>
+          <option value="cha">CHA</option>
+        </select>
+      </div>
+      <div class="sc-extra-item">
+        <span>Spell save DC: </span>
+        <span class="mod">{getSpellsaveDC(char_proficiency_bonus, char_spellcasting)}</span>
+      </div>
+      <div class="sc-extra-item">
+        <span>Spell attack bonus: </span>
+        <span class="mod">{formatModifier(getSpellAttackBonus(char_proficiency_bonus, char_spellcasting))}</span>
+      </div>
+    </div>
 
     <!-- CANTRIPS -->
     <h3>Cantrips</h3>

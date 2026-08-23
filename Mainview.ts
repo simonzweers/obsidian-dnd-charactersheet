@@ -117,6 +117,7 @@ export class CharacterSheetView extends ItemView {
         char_traits,
         char_proficiencies,
         char_spells,
+        char_spellcasting: frontmatter.spellcasting ?? "int",
       }
     });
   }
