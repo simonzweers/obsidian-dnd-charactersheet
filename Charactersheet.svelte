@@ -9,14 +9,39 @@
   export let char_abilities: Record<string, number>;
   export let char_hp: Record<string, number>;
   export let char_proficiency_bonus: number;
-  export let char_skills: object;
+  export let char_skills: Record<string, boolean>;
   // export let frontmatter: Record<string, any>;
   let count = 0;
 
-  const abilityMod = (score: number) => Math.floor((score - 10) / 2);
-  const fmtMod = (mod: number) => (mod >= 0 ? `+${mod}` : `${mod}`);
+  function getAbilityModifier(score: number) {
+    return Math.floor((score - 10) / 2);
+  };
+  function getSkillModifier(base: number, proficient: boolean) {
+    return proficient ? base + char_proficiency_bonus: base;
+  }
+  const formatModifier = (mod: number) => (mod >= 0 ? `+${mod}` : `${mod}`);
 
   const abilityKeys = ["str", "dex", "con", "int", "wis", "cha"] as const;
+  const skillKeys = [
+    { skill: "Acrobatics", ability: "dex" },
+    { skill: "Animal Handling", ability: "wis" },
+    { skill: "Arcana", ability: "int" },
+    { skill: "Athletics", ability: "str" },
+    { skill: "Deception", ability: "cha" },
+    { skill: "History", ability: "int" },
+    { skill: "Insight", ability: "wis" },
+    { skill: "Intimidation", ability: "cha" },
+    { skill: "Investigation", ability: "int" },
+    { skill: "Medicine", ability: "wis" },
+    { skill: "Nature", ability: "int" },
+    { skill: "Perception", ability: "wis" },
+    { skill: "Performance", ability: "cha" },
+    { skill: "Persuasion", ability: "cha" },
+    { skill: "Religion", ability: "int" },
+    { skill: "Sleight of Hand", ability: "dex" },
+    { skill: "Stealth", ability: "dex" },
+    { skill: "Survival", ability: "wis" },
+  ] as const;
 
   async function updateLevel(newLevel: number) {
     char_level = newLevel;
@@ -35,10 +60,19 @@
   }
 
   async function updateAbility(ability: string, level: number) {
-    char_abilities[ability] = level;
+    char_abilities = { ...char_abilities, [ability]: level };
     await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      frontmatter.char_abilities = char_abilities;
+      frontmatter.abilities = char_abilities;
     })
+  }
+
+  async function updateSkill(skill: string, proficiency: boolean) {
+    char_skills = { ...char_skills, [skill]: proficiency };
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+        if (!frontmatter.skills) frontmatter.skills = {};
+        frontmatter.skills[skill] = proficiency;
+    });
   }
 
   async function updateHP(hpType: "current" | "max" | "temp", newHP: number) {
@@ -71,6 +105,7 @@
     />
   </label>
 
+  <!-- ABILITIES -->
   <div class="abilities-grid">
     {#each abilityKeys as key}
       <div class="ability-box">
@@ -82,11 +117,33 @@
           value={char_abilities[key]}
           on:change={(e) => updateAbility(key, Number(e.currentTarget.value))}
         />
-        <span class="mod">{fmtMod(abilityMod(Number(char_abilities[key])))}</span>
+        <span class="mod">{formatModifier(getAbilityModifier(Number(char_abilities[key])))}</span>
       </div>
     {/each}
   </div>
 
+  <!-- SKILLS -->
+  <div>
+    {#each skillKeys as {skill, ability}}
+      <div class="skill-box">
+        <input
+          id={skill}
+          type="checkbox"
+          checked={char_skills[skill] ?? false}
+          value={char_skills[skill]}
+          on:change={(e) => updateSkill(skill, Boolean(e.currentTarget.checked))}
+        />
+        <!-- This needs to have an expanded function call because the element does not reload without referencing char_abilities and char_skills -->
+        <span class="mod">{formatModifier(getSkillModifier(getAbilityModifier(char_abilities[ability]), char_skills[skill]))}</span>
+        <label for={skill}>{skill}</label>
+        <span class="mod"> {ability.toUpperCase()}</span>
+      </div>
+    {/each}
+  </div>
+
+  <!-- SAVING THROWS -->
+
+  <!-- HP -->
   <div class="hp-block">
     <label>
       HP
@@ -150,6 +207,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 110px;
     border: 1px solid var(--background-modifier-border);
     border-radius: 6px;
     padding: 0.4rem;
