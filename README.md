@@ -34,6 +34,7 @@ Below you can see an example of the layout with a simple character.
 - Add a "create charactersheet" button when frontmatter is not found
 - Add the ability to view and edit Race
 - Figure out how to provide build of 
+- Put Currency and inventory side by side
 
 <!-- # Obsidian Sample Plugin
 
