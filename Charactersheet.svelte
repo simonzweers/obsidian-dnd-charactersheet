@@ -16,8 +16,8 @@
   function getAbilityModifier(score: number) {
     return Math.floor((score - 10) / 2);
   };
-  function getSkillModifier(base: number, proficient: boolean) {
-    return proficient ? base + char_proficiency_bonus: base;
+  function getSkillModifier(base: number, proficient: boolean, bonus: number) {
+    return proficient ? base + bonus: base;
   }
   const formatModifier = (mod: number) => (mod >= 0 ? `+${mod}` : `${mod}`);
 
@@ -57,6 +57,13 @@
       frontmatter.class = newClass;
     })
     new Notice("Updated Class");
+  }
+
+  async function updateProficiencyBonus(newBonus: number) {
+    char_proficiency_bonus = newBonus;
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      frontmatter.proficiency_bonus = newBonus;
+    })
   }
 
   async function updateAbility(ability: string, level: number) {
@@ -105,6 +112,16 @@
     />
   </label>
 
+  <label class = "stat-row">
+    <span>Proficiency Bonus</span>
+    <input
+    class="num-input"
+    type="number"
+    value={char_proficiency_bonus}
+    on:change={(e) => updateProficiencyBonus(Number(e.currentTarget.value))}
+    />
+  </label>
+
   <!-- ABILITIES -->
   <div class="abilities-grid">
     {#each abilityKeys as key}
@@ -134,7 +151,7 @@
           on:change={(e) => updateSkill(skill, Boolean(e.currentTarget.checked))}
         />
         <!-- This needs to have an expanded function call because the element does not reload without referencing char_abilities and char_skills -->
-        <span class="mod">{formatModifier(getSkillModifier(getAbilityModifier(char_abilities[ability]), char_skills[skill]))}</span>
+        <span class="mod">{formatModifier(getSkillModifier(getAbilityModifier(char_abilities[ability]), char_skills[skill], char_proficiency_bonus))}</span>
         <label for={skill}>{skill}</label>
         <span class="mod"> {ability.toUpperCase()}</span>
       </div>
