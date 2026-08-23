@@ -24,6 +24,8 @@
     [levelKey: string]: SpellLevel | Spell[];
   }
 
+  const MAX_SPELL_LEVEL = 9;
+
   export let app: App;
   export let file: TFile;
   export let char_name: string;
@@ -79,6 +81,15 @@
   let newItemName = "";
   let newTrait = "";
   let newProficiency = "";
+
+  // all possible level keys, 1 through 9
+  const allLevelKeys = Array.from({ length: MAX_SPELL_LEVEL }, (_, i) => `lvl${i + 1}`);
+  const emptyLevel: SpellLevel = { total_slots: 0, slots_expended: 0, learned: [] };
+
+  // always returns a valid SpellLevel, even if the character has no data for it yet
+  function getLevel(levelKey: string): SpellLevel {
+    return (char_spells[levelKey] as SpellLevel) ?? emptyLevel;
+  }
 
   $: spellLevelKeys = Object.keys(char_spells)
     .filter((k) => k !== "cantrips")
@@ -460,24 +471,25 @@
     if (!name) return;
 
     const spell: Spell = { name, prepared: false, link: "" };
-    const level = char_spells[levelKey] as SpellLevel;
+    const level = getLevel(levelKey);
     char_spells = { ...char_spells, [levelKey]: { ...level, learned: [...level.learned, spell] } };
     newSpellNames = { ...newSpellNames, [levelKey]: "" };
 
     await app.fileManager.processFrontMatter(file, (fm) => {
-      if (!fm.spells?.[levelKey]) return;
-      if (!fm.spells[levelKey].learned) fm.spells[levelKey].learned = [];
+      if (!fm.spells) fm.spells = {};
+      if (!fm.spells[levelKey]) fm.spells[levelKey] = { total_slots: 0, slots_expended: 0, learned: [] };
       fm.spells[levelKey].learned.push(spell);
     });
   }
 
   // --- Slot counters ---
   async function updateSlots(levelKey: string, field: "total_slots" | "slots_expended", value: number) {
-    const level = char_spells[levelKey] as SpellLevel;
+    const level = getLevel(levelKey);
     char_spells = { ...char_spells, [levelKey]: { ...level, [field]: value } };
 
     await app.fileManager.processFrontMatter(file, (fm) => {
-      if (!fm.spells?.[levelKey]) return;
+      if (!fm.spells) fm.spells = {};
+      if (!fm.spells[levelKey]) fm.spells[levelKey] = { total_slots: 0, slots_expended: 0, learned: [] };
       fm.spells[levelKey][field] = value;
     });
   }
@@ -827,65 +839,75 @@
         </li>
       {/each}
     </ul>
-  </div>
-
-  <!-- LEVELED SPELLS -->
-  {#each spellLevelKeys as levelKey}
-    {@const level = char_spells[levelKey]}
-    <h3>Level {levelKey.replace("lvl", "")}</h3>
-
-    <div class="slots-row">
-      <label class="stat-row">
-        <span>Total slots</span>
-        <input
-          class="num-input"
-          type="number"
-          value={level.total_slots}
-          on:change={(e) => updateSlots(levelKey, "total_slots", Number(e.currentTarget.value))}
-        />
-      </label>
-      <label class="stat-row">
-        <span>Expended</span>
-        <input
-          class="num-input"
-          type="number"
-          value={level.slots_expended}
-          on:change={(e) => updateSlots(levelKey, "slots_expended", Number(e.currentTarget.value))}
-        />
-      </label>
-    </div>
-
-    <ul class="spell-list">
-      {#each level.learned as spell, index}
-      <li class="spell-row">
-        <input
-          type="checkbox"
-          title="Prepared"
-          checked={spell.prepared ?? false}
-          on:change={() => toggleSpellPrepared(levelKey, index)}
-        />
-        <span class="spell-name">{spell.name}</span>
-        <div class="spell-actions">
-            <button class="icon-btn" title="Paste link" on:click={() => pasteSpellLink(levelKey, index)}>📋</button>
-            <button class="icon-btn" title="Copy link" on:click={() => copySpellLink(levelKey, index)}>🔗</button>
-            <button class="icon-btn" disabled={index === 0} title="Move up" on:click={() => moveSpellUp(levelKey, index)}>↑</button>
-            <button class="icon-btn" title="Remove" on:click={() => removeSpell(levelKey, index)}>✕</button>
-        </div>
-      </li>
-      {/each}
-    </ul>
-
     <div class="spell-row">
       <input
         class="text-input"
         type="text"
-        placeholder="New Spell"
-        bind:value={newSpellNames[levelKey]}
-        on:keydown={(e) => e.key === "Enter" && addSpell(levelKey)}
+        placeholder="New cantrip"
+        bind:value={newCantripName}
+        on:keydown={(e) => e.key === "Enter" && addCantrip()}
       />
-      <button on:click={() => addSpell(levelKey)}>Add</button>
+      <button on:click={addCantrip}>Add</button>
     </div>
-  {/each}
+
+    <!-- LEVELED SPELLS -->
+    {#each allLevelKeys as levelKey}
+      {@const level = char_spells[levelKey] ?? emptyLevel}
+      <h3>Level {levelKey.replace("lvl", "")}</h3>
+
+      <div class="slots-row">
+        <label class="stat-row">
+          <span>Total slots</span>
+          <input
+            class="num-input"
+            type="number"
+            value={level.total_slots}
+            on:change={(e) => updateSlots(levelKey, "total_slots", Number(e.currentTarget.value))}
+          />
+        </label>
+        <label class="stat-row">
+          <span>Expended</span>
+          <input
+            class="num-input"
+            type="number"
+            value={level.slots_expended}
+            on:change={(e) => updateSlots(levelKey, "slots_expended", Number(e.currentTarget.value))}
+          />
+        </label>
+      </div>
+
+      <ul class="spell-list">
+        {#each level.learned as spell, index}
+        <li class="spell-row">
+          <input
+            type="checkbox"
+            title="Prepared"
+            checked={spell.prepared ?? false}
+            on:change={() => toggleSpellPrepared(levelKey, index)}
+          />
+          <span class="spell-name">{spell.name}</span>
+          <div class="spell-actions">
+              <button class="icon-btn" title="Paste link" on:click={() => pasteSpellLink(levelKey, index)}>📋</button>
+              <button class="icon-btn" title="Copy link" on:click={() => copySpellLink(levelKey, index)}>🔗</button>
+              <button class="icon-btn" disabled={index === 0} title="Move up" on:click={() => moveSpellUp(levelKey, index)}>↑</button>
+              <button class="icon-btn" title="Remove" on:click={() => removeSpell(levelKey, index)}>✕</button>
+          </div>
+        </li>
+        {/each}
+      </ul>
+
+      <div class="spell-row">
+        <input
+          class="text-input"
+          type="text"
+          placeholder="New Spell"
+          bind:value={newSpellNames[levelKey]}
+          on:keydown={(e) => e.key === "Enter" && addSpell(levelKey)}
+        />
+        <button on:click={() => addSpell(levelKey)}>Add</button>
+      </div>
+    {/each}
+  </div>
 
 </div>
 
