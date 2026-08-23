@@ -66,6 +66,15 @@ export class CharacterSheetView extends ItemView {
     }
     const char_skills = frontmatter.skills ?? {}
     const char_saving_throws = frontmatter.saving_throws ?? {}
+    const char_currency = {
+      bp: 0, sp: 0, ep: 0, gp: 0, pp: 0,
+      ...(frontmatter.money ?? {}),
+    };
+    const char_inventory: string[] = frontmatter.inventory ?? [];
+
+    console.log(char_currency)
+    console.log(char_inventory)
+
     // Attach the Svelte component to the ItemViews content element and provide the needed props.
     this.component = mount(Charactersheet, {
       target: container,
@@ -80,11 +89,10 @@ export class CharacterSheetView extends ItemView {
         char_proficiency_bonus: frontmatter.proficiency_bonus ?? 2,
         char_skills,
         char_saving_throws,
+        char_currency,
+        char_inventory,
       }
     });
-
-    // Since the component instance is typed, the exported `increment` method is known to TypeScript.
-    this.component.increment();
   }
 
   async onClose() {

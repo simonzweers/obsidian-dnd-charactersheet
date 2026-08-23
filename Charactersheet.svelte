@@ -10,9 +10,10 @@
   export let char_hp: Record<string, number>;
   export let char_proficiency_bonus: number;
   export let char_skills: Record<string, boolean>;
-  export let char_saving_throws: Record<string, boolean>
+  export let char_saving_throws: Record<string, boolean>;
+  export let char_currency: Record<string, number>;
+  export let char_inventory: string[];
   // export let frontmatter: Record<string, any>;
-  let count = 0;
 
   function getAbilityModifier(score: number) {
     return Math.floor((score - 10) / 2);
@@ -43,6 +44,9 @@
     { skill: "Stealth", ability: "dex" },
     { skill: "Survival", ability: "wis" },
   ] as const;
+
+  const currencyKeys = ["cp", "sp", "ep", "gp", "pp"] as const;
+  let newItemName = "";
 
   async function updateLevel(newLevel: number) {
     char_level = newLevel;
@@ -97,8 +101,49 @@
     char_hp[hpType] = newHP;
   }
 
-  export function increment() {
-    count += 1;
+  async function updateMoney(currency: string, value: number) {
+    char_currency = { ...char_currency, [currency]: value };
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.currency) frontmatter.currency = {};
+      frontmatter.currency[currency] = value;
+    });
+  }
+
+  async function addInventoryItem() {
+    const item = newItemName.trim();
+    if (!item) return;
+
+    char_inventory = [...char_inventory, item];
+    newItemName = "";
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.inventory) frontmatter.inventory = [];
+      frontmatter.inventory.push(item);
+    });
+  }
+
+  async function removeInventoryItem(index: number) {
+    char_inventory = char_inventory.filter((_, i) => i !== index);
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.inventory) return;
+      frontmatter.inventory.splice(index, 1);
+    });
+  }
+
+  async function moveItemUp(index: number) {
+    if (index === 0) return; // already at the top, nothing to do
+
+    const updated = [...char_inventory];
+    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+    char_inventory = updated;
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.inventory) return;
+      const fmInv = frontmatter.inventory;
+      [fmInv[index - 1], fmInv[index]] = [fmInv[index], fmInv[index - 1]];
+    });
   }
 </script>
 
@@ -133,7 +178,39 @@
     />
   </label>
 
+  <!-- HP -->
+  <div class="hp-block">
+    <h2>HP</h2>
+    <label>
+      HP
+      <input
+        type="number"
+        class="num-input"
+        value={char_hp.current}
+        on:change={(e) => updateHP("current", Number(e.currentTarget.value))}
+      />
+      <span style="font-weight: bold">+</span>
+      <input
+        type="number"
+        class="num-input"
+        value={char_hp.temp}
+        on:change={(e) => updateHP("temp", Number(e.currentTarget.value))}
+      />
+      <span style="font-weight: bold">= </span>
+      <span class="mod">{char_hp.current + char_hp.temp}</span>
+
+      <span style="font-weight: bold">/</span>
+      <input
+        type="number"
+        class="num-input"
+        value={char_hp.max}
+        on:change={(e) => updateHP("max", Number(e.currentTarget.value))}
+      />
+    </label>
+  </div>
+
   <!-- ABILITIES -->
+  <h2>Abilities</h2>
   <div class="abilities-grid">
     {#each abilityKeys as key}
       <div class="ability-box">
@@ -188,36 +265,59 @@
     {/each}
   </div>
 
-  <!-- HP -->
-  <div class="hp-block">
-    <h2>HP</h2>
-    <label>
-      HP
-      <input
-        type="number"
-        class="num-input"
-        value={char_hp.current}
-        on:change={(e) => updateHP("current", Number(e.currentTarget.value))}
-      />
-      <span style="font-weight: bold">+</span>
-      <input
-        type="number"
-        class="num-input"
-        value={char_hp.temp}
-        on:change={(e) => updateHP("temp", Number(e.currentTarget.value))}
-      />
-      <span style="font-weight: bold">= </span>
-      <span class="mod">{char_hp.current + char_hp.temp}</span>
-
-      <span style="font-weight: bold">/</span>
-      <input
-        type="number"
-        class="num-input"
-        value={char_hp.max}
-        on:change={(e) => updateHP("max", Number(e.currentTarget.value))}
-      />
-    </label>
+  <!-- MONEY -->
+  <div>
+    <h2>Money</h2>
+    <div class="currency-row">
+      {#each currencyKeys as coin}
+        <label class="stat-row">
+          <span>{coin.toUpperCase()}</span>
+          <input
+            class="num-input"
+            type="number"
+            value={char_currency[coin]}
+            on:change={(e) => updateMoney(coin, Number(e.currentTarget.value))}
+          />
+        </label>
+      {/each}
+    </div>
   </div>
+
+  <!-- INVENTORY -->
+  <div>
+    <h2>Inventory</h2>
+    <ul class="inventory-list">
+      {#each char_inventory as item, index}
+        <li>
+          <button
+            class="icon-btn"
+            disabled={index === 0}
+            on:click={() => moveItemUp(index)}
+          >↑</button>
+          <span class="item-name">{item}</span>
+          <button class="icon-btn" on:click={() => removeInventoryItem(index)}>✕</button>
+        </li>
+      {/each}
+    </ul>
+
+    <div class="stat-row">
+      <input
+        class="text-input"
+        type="text"
+        placeholder="New item"
+        bind:value={newItemName}
+        on:keydown={(e) => e.key === "Enter" && addInventoryItem()}
+      />
+      <button on:click={addInventoryItem}>Add</button>
+    </div>
+  </div>
+
+  <!-- ATTACKS & SPELLCASTING -->
+  <div>
+    <h2>Attacks & Spellcasting</h2>
+
+  </div>
+
 </div>
 
 <style>
@@ -261,5 +361,35 @@
   .mod {
     font-weight: bold;
     color: var(--text-accent);
+  }
+
+  .currency-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .inventory-list {
+    list-style: none;
+    padding: 0;
+    margin: 4px 0;
+  }
+
+  .inventory-list li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+  }
+
+  .item-name {
+    flex: 1;
+  }
+
+  .icon-btn {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    line-height: 1;
   }
 </style>
