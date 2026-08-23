@@ -546,7 +546,7 @@
         </li>
       {/each}
     </ul>
-    <div class="stat-row">
+    <div class="add-listitem-row">
       <input
         class="text-input"
         type="text"
@@ -576,7 +576,7 @@
 
   .stat-grid {
     display: grid !important;
-    !!!/* grid-template-columns: auto auto; */
+    grid-template-columns: auto auto;
     row-gap: 300px 300px;
     align-items: center;
     gap: 10px;
@@ -584,6 +584,19 @@
   }
 
   .stat-row {
+    display: flex;
+    align-items: left;
+    text-align: left;
+  }
+
+  .stat-row input {
+    margin-left: auto;
+  }
+  .stat-row .mod {
+    margin-left: auto;
+  }
+
+  .add-listitem-row {
     display: flex;
     align-items: left;
     text-align: left;
