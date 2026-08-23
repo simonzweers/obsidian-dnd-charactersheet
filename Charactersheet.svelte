@@ -842,7 +842,7 @@
   <div>
     <h2>Spells</h2>
     
-    <div class="sc-extra">
+    <div class="sc-extra-grid">
       <div class="sc-extra-item">
         <span>Spellcasting Ability</span>
         <select id="sc-menu" name="sc-menu" on:change={(e) => updateSpellcasting(e.currentTarget.value)}>
@@ -1101,5 +1101,22 @@
     display: flex;
     gap: 12px;
     margin-bottom: 4px;
+  }
+
+  .sc-extra-grid {
+    display: grid !important;
+    grid-template-columns: auto;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sc-extra-item {
+    display: flex;
+    align-items: center;
+    text-align: left; 
+    gap: 10px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    padding: 0.4rem;
   }
 </style>
