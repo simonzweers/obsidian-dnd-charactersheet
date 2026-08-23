@@ -22,6 +22,14 @@ cd .obsidian/plugins/obsidian-dnd-charactersheet
 npm install && npm run build
 ```
 
+## Usage
+
+1. Enable the plugin: Settings > Community Plugins > Installed Plugins > Enable "DnD Character Sheet Tool"
+2. Create a file with the name of your character (see the UI preview)
+3. Click on the plugin icon "dice".
+4. The character sheet view will pop up. It will say "This note has no frontmatter". Click on the "Create Character Sheet" button. This will load the view, and enable you to start editing your character.
+5. (Optional) Add lore or other notes through the regular text editor.
+
 ## UI Preview
 
 Below you can see an example of the layout with a simple character.
