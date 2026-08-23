@@ -1,6 +1,12 @@
 <script lang="ts">
   import { type TFile, type App, Notice } from "obsidian";
-
+  interface Attack {
+    name: string;
+    ability: string;
+    proficient: boolean;
+    damage: string;
+    damage_type: string;
+  }
   export let app: App;
   export let file: TFile;
   export let char_name: string;
@@ -13,6 +19,7 @@
   export let char_saving_throws: Record<string, boolean>;
   export let char_currency: Record<string, number>;
   export let char_inventory: string[];
+  export let char_attacks: Attack[];
   // export let frontmatter: Record<string, any>;
 
   function getAbilityModifier(score: number) {
@@ -145,6 +152,49 @@
       [fmInv[index - 1], fmInv[index]] = [fmInv[index], fmInv[index - 1]];
     });
   }
+
+  function getAttackBonus(attack: Attack) {
+    const ability = attack.ability?.toLowerCase();
+    const base = char_abilities[ability] !== undefined ? getAbilityModifier(char_abilities[ability]) : 0;
+    const proficient = String(attack.proficient).toLowerCase() === "true";
+    return proficient ? base + char_proficiency_bonus : base;
+  }
+
+  async function updateAttackField(index: number, field: keyof Attack, value: string | boolean) {
+    char_attacks = char_attacks.map((atk, i) =>
+      i === index ? { ...atk, [field]: value } : atk
+    );
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.attacks) return;
+      frontmatter.attacks[index][field] = value;
+    });
+  }
+
+  async function removeAttack(index: number) {
+    char_attacks = char_attacks.filter((_, i) => i !== index);
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.attacks) return;
+      frontmatter.attacks.splice(index, 1);
+    });
+  }
+
+  let newAttack: { name: string; ability: string; proficient: boolean; damage: string; damage_type: string } = { name: "", ability: "", proficient: false, damage: "", damage_type: "" };
+
+  async function addAttack() {
+    if (!newAttack.name.trim()) return;
+
+    const attackToAdd = { ...newAttack };
+    char_attacks = [...char_attacks, attackToAdd];
+    newAttack = { name: "", ability: "", proficient: false, damage: "", damage_type: "" };
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.attacks) frontmatter.attacks = [];
+      frontmatter.attacks.push(attackToAdd);
+    });
+  }
+
 </script>
 
 <div class="sheet-container">
@@ -316,6 +366,64 @@
   <div>
     <h2>Attacks & Spellcasting</h2>
 
+    <div class="attack-table">
+      <!-- <div class="attack-row attack-header">
+        <span>Name</span>
+        <span>Ability</span>
+        <span>Proficient</span>
+        <span>Damage</span>
+        <span>Type</span>
+        <span>Bonus</span>
+        <span></span>
+      </div> -->
+
+      {#each char_attacks as attack, index}
+        <div class="attack-row">
+          <input
+            class="text-input"
+            type="text"
+            value={attack.name}
+            on:change={(e) => updateAttackField(index, "name", e.currentTarget.value)}
+          />
+          <input
+            class="text-input small"
+            type="text"
+            value={attack.ability}
+            on:change={(e) => updateAttackField(index, "ability", e.currentTarget.value)}
+          />
+          <input
+            class=""
+            type="checkbox"
+            value={String(attack.proficient)}
+            on:change={(e) => updateAttackField(index, "proficient", e.currentTarget.checked)}
+          />
+          <input
+            class="text-input small"
+            type="text"
+            value={attack.damage}
+            on:change={(e) => updateAttackField(index, "damage", e.currentTarget.value)}
+          />
+          <input
+            class="text-input small"
+            type="text"
+            value={attack.damage_type}
+            on:change={(e) => updateAttackField(index, "damage_type", e.currentTarget.value)}
+          />
+          <span class="mod">{formatModifier(getAttackBonus(attack))}</span>
+          <button class="icon-btn" on:click={() => removeAttack(index)}>✕</button>
+        </div>
+      {/each}
+
+      <div class="attack-row attack-new">
+        <input class="text-input" type="text" placeholder="Name" bind:value={newAttack.name} />
+        <input class="text-input small" type="text" placeholder="str/dex/..." bind:value={newAttack.ability} />
+        <input class="" type="checkbox" placeholder="true/false" bind:value={newAttack.proficient} />
+        <input class="text-input small" type="text" placeholder="1d6" bind:value={newAttack.damage} />
+        <input class="text-input small" type="text" placeholder="slashing" bind:value={newAttack.damage_type} />
+        <span></span>
+        <button on:click={addAttack}>Add</button>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -391,5 +499,27 @@
     height: 24px;
     padding: 0;
     line-height: 1;
+  }
+  .attack-table {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .attack-row {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.6fr auto;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .attack-header {
+    font-weight: bold;
+    font-size: 0.85em;
+    color: var(--text-muted);
+  }
+
+  .text-input.small {
+    width: 60px !important;
   }
 </style>
