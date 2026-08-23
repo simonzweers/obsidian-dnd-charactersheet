@@ -1,4 +1,36 @@
-# Obsidian Sample Plugin
+# Obsidian: DnD Character Sheet Tool
+
+This is a simple DnD charactersheet viewer/editor. It enables the creation and viewing of charactersheets directly inside of Obsidian.
+
+## Key features
+
+- Editing fields directly in the charactersheet view
+- Automatically calculate "calculated" fields such as Initiative, HP, Skills
+- Embed character sheet directly into file properties, to allow for additional writing inside the file
+- The ability to add links to saved spells, to allow for easy lookup
+
+## Installation
+
+This plugin is not yet available to install from within obsidian, so you need to install it manually.
+Execute the following commands inside your vault.
+```bash
+cd <your-vault>
+git clone https://github.com/simonzweers/obsidian-dnd-charactersheet.git .obsidian/plugins/obsidian-dnd-charactersheet
+```
+
+## UI Preview
+
+Below you can see an example of the layout with a simple character.
+
+![example_ui](./images/example_ui.png)
+
+
+## TODO
+- Add a "Open in browser" button for the spells
+- Add a "create charactersheet" button when frontmatter is not found
+- Add the ability to view and edit Race
+
+<!-- # Obsidian Sample Plugin
 
 This is a sample plugin for Obsidian (https://obsidian.md).
 
@@ -91,4 +123,4 @@ If you have multiple URLs, you can also do:
 
 ## API Documentation
 
-See https://github.com/obsidianmd/obsidian-api
+See https://github.com/obsidianmd/obsidian-api -->
