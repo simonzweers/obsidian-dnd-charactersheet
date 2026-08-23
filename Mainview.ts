@@ -55,19 +55,31 @@ export class CharacterSheetView extends ItemView {
       container.createEl("p", { text: "This note has no frontmatter."});
       return;
     }
+
+    const char_abilities = {
+      str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10,
+      ...(frontmatter.abilities ?? {}),
+    }
+    const char_hp = {
+      current: 0, max: 0, temp: 0,
+      ...(frontmatter.hp ?? {}),
+    }
+    const char_skills = frontmatter.skills ?? {}
+    const char_saving_throws = frontmatter.saving_throws ?? {}
     // Attach the Svelte component to the ItemViews content element and provide the needed props.
     this.component = mount(Charactersheet, {
       target: container,
       props: {
         app: this.app,
         file,
-        char_name: frontmatter.name,
-        char_class: frontmatter.class,
-        char_level: frontmatter.level,
-        char_abilities: frontmatter.abilities,
-        char_hp: frontmatter.hp,
-        char_proficiency_bonus: frontmatter.proficiency_bonus,
-        char_skills: frontmatter.skills,
+        char_name: frontmatter.name ?? "Unnamed",
+        char_class: frontmatter.class ?? "",
+        char_level: frontmatter.level ?? 1,
+        char_abilities,
+        char_hp,
+        char_proficiency_bonus: frontmatter.proficiency_bonus ?? 2,
+        char_skills,
+        char_saving_throws,
       }
     });
 
