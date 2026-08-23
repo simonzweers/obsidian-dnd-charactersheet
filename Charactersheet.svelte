@@ -13,6 +13,8 @@
   export let char_class: string;
   export let char_level: number;
   export let char_background: string;
+  export let char_ac: number;
+  export let char_speed: number;
   export let char_abilities: Record<string, number>;
   export let char_hp: Record<string, number>;
   export let char_proficiency_bonus: number;
@@ -76,6 +78,20 @@
     char_class = newClass;
     await app.fileManager.processFrontMatter(file, (frontmatter) => {
       frontmatter.class = newClass;
+    })
+  }
+
+  async function updateAc(newAc: number) {
+    char_ac = newAc;
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      frontmatter.ac = newAc;
+    })
+  }
+
+  async function updateSpeed(newSpeed: number) {
+    char_speed = newSpeed;
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      frontmatter.speed = newSpeed;
     })
   }
 
@@ -287,6 +303,31 @@
       value={char_proficiency_bonus}
       on:change={(e) => updateProficiencyBonus(Number(e.currentTarget.value))}
       />
+    </div>
+
+    <div class="stat-row">
+      <span>Armor Class</span>
+      <input
+      class="num-input"
+      type="number"
+      value={char_ac}
+      on:change={(e) => updateAc(Number(e.currentTarget.value))}
+      />
+    </div>
+
+    <div class="stat-row">
+      <span>Speed</span>
+      <input
+      class="num-input"
+      type="number"
+      value={char_speed}
+      on:change={(e) => updateSpeed(Number(e.currentTarget.value))}
+      />
+    </div>
+
+    <div class="stat-row">
+      <span>Initiative</span>
+      <span class="mod">{formatModifier(getAbilityModifier(char_abilities["dex"]))}</span>
     </div>
   </div>
 
@@ -535,7 +576,7 @@
 
   .stat-grid {
     display: grid !important;
-    grid-template-columns: auto;
+    !!!/* grid-template-columns: auto auto; */
     row-gap: 300px 300px;
     align-items: center;
     gap: 10px;

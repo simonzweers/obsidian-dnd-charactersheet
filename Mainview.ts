@@ -96,6 +96,8 @@ export class CharacterSheetView extends ItemView {
         char_class: frontmatter.class ?? "",
         char_level: frontmatter.level ?? 1,
         char_background: frontmatter.background ?? "No Background",
+        char_ac: frontmatter.ac ?? 10,
+        char_speed: frontmatter.speed ?? 30,
         char_abilities,
         char_hp,
         char_proficiency_bonus: frontmatter.proficiency_bonus ?? 2,
