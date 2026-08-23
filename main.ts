@@ -78,7 +78,6 @@ export default class CharacterSheet extends Plugin {
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'DnD Character Sheets', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('Hello World');
 			this.activateView();
 		});
 		// Perform additional things with the ribbon
