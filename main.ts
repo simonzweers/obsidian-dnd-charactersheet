@@ -1,4 +1,4 @@
-import { CharacterSheetView, VIEW_TYPE_EXAMPLE } from 'Mainview';
+import { CharacterSheetView, VIEW_TYPE_CHARACTERSHEET } from 'Mainview';
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
@@ -72,11 +72,11 @@ export default class CharacterSheet extends Plugin {
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 
 		this.registerView(
-			VIEW_TYPE_EXAMPLE,
+			VIEW_TYPE_CHARACTERSHEET,
 			(leaf) => new CharacterSheetView(leaf)
 		);
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'DnD Character Sheet Tool', (evt: MouseEvent) => {
+		const ribbonIconEl = this.addRibbonIcon('dice', 'DnD Character Sheets', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
 			new Notice('Hello World');
 			this.activateView();
@@ -101,13 +101,13 @@ export default class CharacterSheet extends Plugin {
 		const { workspace } = this.app;
 
 		let leaf: WorkspaceLeaf | null = null;
-		const leaves = workspace.getLeavesOfType(VIEW_TYPE_EXAMPLE);
+		const leaves = workspace.getLeavesOfType(VIEW_TYPE_CHARACTERSHEET);
 
 		if (leaves.length > 0 ) {
 			leaf = leaves[0];
 		} else {
 			leaf = workspace.getRightLeaf(false);
-			await leaf?.setViewState({type: VIEW_TYPE_EXAMPLE, active: true});
+			await leaf?.setViewState({type: VIEW_TYPE_CHARACTERSHEET, active: true});
 		}
 		workspace.revealLeaf(leaf);
 	}
