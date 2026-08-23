@@ -64,6 +64,15 @@ export class CharacterSheetView extends ItemView {
     const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
     if (!frontmatter) {
       container.createEl("p", { text: "This note has no frontmatter."});
+      const createButton = container.createEl("button", {
+		text: "Create Character Sheet"
+	  });
+	  createButton.addEventListener("click", async () => {
+		  await this.app.fileManager.processFrontMatter(file, (fm) => {
+			  fm.dnd_character = true;
+		  })
+		  this.refresh();
+	  });
       return;
     }
 
