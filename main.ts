@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS: CharacterSheetSettings = {
 }
 
 export default class CharacterSheet extends Plugin {
-	settings: CharacterSheetSettings;
+	settings!: CharacterSheetSettings;
 
 	async onload() {
 		await this.loadSettings();
@@ -108,6 +108,11 @@ export default class CharacterSheet extends Plugin {
 		} else {
 			leaf = workspace.getRightLeaf(false);
 			await leaf?.setViewState({type: VIEW_TYPE_CHARACTERSHEET, active: true});
+		}
+
+		if (!leaf) {
+			new Notice("Couldn't open the character sheet view.");
+			return;
 		}
 		workspace.revealLeaf(leaf);
 	}
