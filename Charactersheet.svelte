@@ -104,7 +104,7 @@
         on:change={(e) => updateHP("temp", Number(e.currentTarget.value))}
       />
       <span style="font-weight: bold">= </span>
-      <span class="">{char_hp.current + char_hp.temp}</span>
+      <span class="mod">{char_hp.current + char_hp.temp}</span>
 
       <span style="font-weight: bold">/</span>
       <input
