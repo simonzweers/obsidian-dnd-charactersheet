@@ -248,46 +248,47 @@
 
 <div class="sheet-container">
   <h1>Character Name: {char_name}</h1>
-  <label class="stat-row">
-    <span>Class</span>
-    <input
-    class="text-input"
-    type="string"
-    value={char_class}
-    on:change={(e) => updateClass(String(e.currentTarget.value))}
-    />
-  </label>
+  <div class="stat-grid">
+    <div class="stat-row">
+      <span>Class</span>
+      <input
+      class="text-input"
+      type="text"
+      value={char_class}
+      on:change={(e) => updateClass(String(e.currentTarget.value))}
+      />
+    </div>
 
-  <label class="stat-row">
-    <span>Lvl</span>
-    <input
-    class="num-input"
-    type="number"
-    value={char_level}
-    on:change={(e) => updateLevel(Number(e.currentTarget.value))}
-    />
-  </label>
+    <div class="stat-row">
+      <span>Lvl</span>
+      <input
+      class="num-input"
+      type="number"
+      value={char_level}
+      on:change={(e) => updateLevel(Number(e.currentTarget.value))}
+      />
+    </div>
 
-  <label class="stat-row">
-    <span>Background</span>
-    <input
-    class="text-input"
-    type="string"
-    value={char_background}
-    on:change={(e) => updateBackground(String(e.currentTarget.value))}
-    />
-  </label>
+    <div class="stat-row">
+      <span>Background</span>
+      <input
+      class="text-input"
+      type="text"
+      value={char_background}
+      on:change={(e) => updateBackground(String(e.currentTarget.value))}
+      />
+    </div>
 
-
-  <label class = "stat-row">
-    <span>Proficiency Bonus</span>
-    <input
-    class="num-input"
-    type="number"
-    value={char_proficiency_bonus}
-    on:change={(e) => updateProficiencyBonus(Number(e.currentTarget.value))}
-    />
-  </label>
+    <div class="stat-row">
+      <span>Proficiency Bonus</span>
+      <input
+      class="num-input"
+      type="number"
+      value={char_proficiency_bonus}
+      on:change={(e) => updateProficiencyBonus(Number(e.currentTarget.value))}
+      />
+    </div>
+  </div>
 
   <!-- HP -->
   <div class="hp-block">
@@ -519,8 +520,8 @@
 
 <style>
   .sheet-container {
-    display: flex;
-    flex-direction: column;
+    /* display: flex;
+    flex-direction: column; */
     gap: 9px;
   }
 
@@ -531,14 +532,22 @@
     width: 100px !important;
   }
 
-  .stat-row {
-    display: flex;
+  .stat-grid {
+    display: grid !important;
+    grid-template-columns: auto 1fr;
+    row-gap: 300px 300px;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    /* max-width: 400px; */
+  }
+
+  .stat-row {
+    display: contents;
+    text-align: left;
   }
 
   .stat-row span {
-    width: 50px;
+    padding-right: 10px;
   }
 
   .abilities-grid {
