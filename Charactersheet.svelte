@@ -12,6 +12,7 @@
   export let char_name: string;
   export let char_class: string;
   export let char_level: number;
+  export let char_background: string;
   export let char_abilities: Record<string, number>;
   export let char_hp: Record<string, number>;
   export let char_proficiency_bonus: number;
@@ -20,6 +21,7 @@
   export let char_currency: Record<string, number>;
   export let char_inventory: string[];
   export let char_attacks: Attack[];
+  export let char_traits: string[];
   // export let frontmatter: Record<string, any>;
 
   function getAbilityModifier(score: number) {
@@ -54,13 +56,20 @@
 
   const currencyKeys = ["cp", "sp", "ep", "gp", "pp"] as const;
   let newItemName = "";
+  let newTrait = "";
 
   async function updateLevel(newLevel: number) {
     char_level = newLevel;
     await app.fileManager.processFrontMatter(file, (frontmatter) => {
       frontmatter.level = newLevel;
     })
-    new Notice("Updated Level");
+  }
+
+  async function updateBackground(newLevel: string) {
+    char_background = newLevel;
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      frontmatter.background = newLevel;
+    })
   }
 
   async function updateClass(newClass: string) {
@@ -68,7 +77,6 @@
     await app.fileManager.processFrontMatter(file, (frontmatter) => {
       frontmatter.class = newClass;
     })
-    new Notice("Updated Class");
   }
 
   async function updateProficiencyBonus(newBonus: number) {
@@ -106,6 +114,11 @@
 
   async function updateHP(hpType: "current" | "max" | "temp", newHP: number) {
     char_hp[hpType] = newHP;
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.hp) frontmatter.hp = {};
+      frontmatter.hp[hpType] = newHP;
+    })
   }
 
   async function updateMoney(currency: string, value: number) {
@@ -139,7 +152,7 @@
     });
   }
 
-  async function moveItemUp(index: number) {
+  async function moveInventoryItemUp(index: number) {
     if (index === 0) return; // already at the top, nothing to do
 
     const updated = [...char_inventory];
@@ -195,19 +208,46 @@
     });
   }
 
+  async function moveTraitUp(index: number) {
+    if (index === 0) return; // already at the top, nothing to do
+
+    const updated = [...char_traits];
+    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+    char_traits = updated;
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.traits) return;
+      const fmInv = frontmatter.trats;
+      [fmInv[index - 1], fmInv[index]] = [fmInv[index], fmInv[index - 1]];
+    });
+  }
+
+  async function removeTrait(index: number) {
+    char_traits = char_traits.filter((_, i) => i !== index);
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.traits) return;
+      frontmatter.traits.splice(index, 1);
+    });
+  }
+
+  async function addTrait() {
+    const item = newTrait.trim();
+    if (!item) return;
+
+    char_traits = [...char_traits, item];
+    newTrait = "";
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.traits) frontmatter.traits = [];
+      frontmatter.traits.push(item);
+    });
+  }
+
 </script>
 
 <div class="sheet-container">
   <h1>Character Name: {char_name}</h1>
-  <label class="stat-row">
-    <span>Lvl</span>
-    <input
-    class="num-input"
-    type="number"
-    value={char_level}
-    on:change={(e) => updateLevel(Number(e.currentTarget.value))}
-    />
-  </label>
   <label class="stat-row">
     <span>Class</span>
     <input
@@ -217,6 +257,27 @@
     on:change={(e) => updateClass(String(e.currentTarget.value))}
     />
   </label>
+
+  <label class="stat-row">
+    <span>Lvl</span>
+    <input
+    class="num-input"
+    type="number"
+    value={char_level}
+    on:change={(e) => updateLevel(Number(e.currentTarget.value))}
+    />
+  </label>
+
+  <label class="stat-row">
+    <span>Background</span>
+    <input
+    class="text-input"
+    type="string"
+    value={char_background}
+    on:change={(e) => updateBackground(String(e.currentTarget.value))}
+    />
+  </label>
+
 
   <label class = "stat-row">
     <span>Proficiency Bonus</span>
@@ -342,7 +403,7 @@
           <button
             class="icon-btn"
             disabled={index === 0}
-            on:click={() => moveItemUp(index)}
+            on:click={() => moveInventoryItemUp(index)}
           >↑</button>
           <span class="item-name">{item}</span>
           <button class="icon-btn" on:click={() => removeInventoryItem(index)}>✕</button>
@@ -423,6 +484,34 @@
         <span></span>
         <button on:click={addAttack}>Add</button>
       </div>
+    </div>
+  </div>
+
+  <!-- FEATURES & TRAITS -->
+  <div>
+    <h2>Features & Traits</h2>
+    <ul class="inventory-list">
+      {#each char_traits as trait, index}
+        <li>
+          <button
+          class="icon-btn"
+          disabled={index === 0}
+          on:click={() => moveTraitUp(index)}
+          >↑</button>
+          <span class="item-name">{trait}</span>
+          <button class="icon-btn" on:click={() => removeInventoryItem(index)}>✕</button>
+        </li>
+      {/each}
+    </ul>
+    <div class="stat-row">
+      <input
+        class="text-input"
+        type="text"
+        placeholder="New trait"
+        bind:value={newTrait}
+        on:keydown={(e) => e.key === "Enter" && addInventoryItem()}
+      />
+      <button on:click={addTrait}>Add</button>
     </div>
   </div>
 

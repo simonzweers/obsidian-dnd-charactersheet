@@ -67,8 +67,8 @@ export class CharacterSheetView extends ItemView {
     const char_skills = frontmatter.skills ?? {}
     const char_saving_throws = frontmatter.saving_throws ?? {}
     const char_currency = {
-      bp: 0, sp: 0, ep: 0, gp: 0, pp: 0,
-      ...(frontmatter.money ?? {}),
+      cp: 0, sp: 0, ep: 0, gp: 0, pp: 0,
+      ...(frontmatter.currency ?? {}),
     };
     const char_inventory: string[] = frontmatter.inventory ?? [];
     interface Attack {
@@ -79,10 +79,12 @@ export class CharacterSheetView extends ItemView {
       damage_type: string;
     }
     const char_attacks: Attack[] = frontmatter.attacks ?? [];
-    
+    const char_traits: string[] = frontmatter.traits ?? [];
+
     console.log(char_currency)
     console.log(char_inventory)
     console.log(char_attacks)
+    console.log(char_traits)
 
     // Attach the Svelte component to the ItemViews content element and provide the needed props.
     this.component = mount(Charactersheet, {
@@ -93,6 +95,7 @@ export class CharacterSheetView extends ItemView {
         char_name: frontmatter.name ?? "Unnamed",
         char_class: frontmatter.class ?? "",
         char_level: frontmatter.level ?? 1,
+        char_background: frontmatter.background ?? "No Background",
         char_abilities,
         char_hp,
         char_proficiency_bonus: frontmatter.proficiency_bonus ?? 2,
@@ -101,6 +104,7 @@ export class CharacterSheetView extends ItemView {
         char_currency,
         char_inventory,
         char_attacks,
+        char_traits,
       }
     });
   }
