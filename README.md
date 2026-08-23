@@ -33,7 +33,7 @@ Below you can see an example of the layout with a simple character.
 - Add a "Open in browser" button for the spells
 - Add a "create charactersheet" button when frontmatter is not found
 - Add the ability to view and edit Race
-- Take the character name from the file-name (?)
+- Figure out how to provide build of 
 
 <!-- # Obsidian Sample Plugin
 
