@@ -535,7 +535,7 @@
 
   .stat-grid {
     display: grid !important;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto;
     row-gap: 300px 300px;
     align-items: center;
     gap: 10px;
@@ -601,19 +601,24 @@
     line-height: 1;
   }
   .attack-table {
-    display: grid;
+    /* display: grid;
     grid-template-columns: repeat(6, max-content) auto;
     gap: 4px;
-    justify-content: start;
+    justify-content: start; */
+    list-style: none;
+    padding: 0;
+    margin: 4px 0
   }
 
   .attack-row {
-    display: contents;
-    /* align-items: left; */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
   }
 
   .attack-row button {
-    justify-self: end;
+    margin-left: auto;
   }
 
   .attack-header {
