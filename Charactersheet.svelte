@@ -24,6 +24,7 @@
   export let char_inventory: string[];
   export let char_attacks: Attack[];
   export let char_traits: string[];
+  export let char_proficiencies: string[];
   // export let frontmatter: Record<string, any>;
 
   function getAbilityModifier(score: number) {
@@ -59,6 +60,7 @@
   const currencyKeys = ["cp", "sp", "ep", "gp", "pp"] as const;
   let newItemName = "";
   let newTrait = "";
+  let newProficiency = "";
 
   async function updateLevel(newLevel: number) {
     char_level = newLevel;
@@ -260,6 +262,42 @@
     });
   }
 
+  async function moveProficiencyUp(index: number) {
+    if (index === 0) return; // already at the top, nothing to do
+
+    const updated = [...char_proficiencies];
+    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+    char_proficiencies = updated;
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.proficiencies) return;
+      const fmInv = frontmatter.proficiencies;
+      [fmInv[index - 1], fmInv[index]] = [fmInv[index], fmInv[index - 1]];
+    });
+  }
+
+  async function removeProficiency(index: number) {
+    char_proficiencies = char_proficiencies.filter((_, i) => i !== index);
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.proficiencies) return;
+      frontmatter.proficiencies.splice(index, 1);
+    });
+  }
+
+  async function addProficiency() {
+    const item = newProficiency.trim();
+    if (!item) return;
+
+    char_proficiencies = [...char_proficiencies, item];
+    newProficiency = "";
+
+    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      if (!frontmatter.proficiencies) frontmatter.proficiencies = [];
+      frontmatter.proficiencies.push(item);
+    });
+  }
+
 </script>
 
 <div class="sheet-container">
@@ -418,6 +456,34 @@
     {/each}
   </div>
 
+  <!-- OTHER SKILLS & PROFICIENCIES -->
+  <div>
+    <h2>Other Skills & Proficiencies</h2>
+    <ul class="inventory-list">
+      {#each char_proficiencies as proficiency, index}
+        <li>
+          <button
+            class="icon-btn"
+            disabled={index === 0}
+            on:click={() => moveProficiencyUp(index)}
+          >↑</button>
+          <span class="item-name">{proficiency}</span>
+          <button class="icon-btn" on:click={() => removeProficiency(index)}>✕</button>
+        </li>
+      {/each}
+    </ul>
+    <div class="stat-additem-row">
+      <input
+        class="text-input"
+        type="text"
+        placeholder="New Proficiency"
+        bind:value={newProficiency}
+        on:keydown={(e) => e.key === "Enter" && addProficiency()}
+      />
+      <button on:click={addProficiency}>Add</button>
+    </div>
+  </div>
+
   <!-- MONEY -->
   <div>
     <h2>Money</h2>
@@ -453,7 +519,7 @@
       {/each}
     </ul>
 
-    <div class="stat-row">
+    <div class="stat-additem-row">
       <input
         class="text-input"
         type="text"

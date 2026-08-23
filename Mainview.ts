@@ -80,6 +80,7 @@ export class CharacterSheetView extends ItemView {
     }
     const char_attacks: Attack[] = frontmatter.attacks ?? [];
     const char_traits: string[] = frontmatter.traits ?? [];
+    const char_proficiencies: string[] = frontmatter.proficiencies ?? [];
 
     console.log(char_currency)
     console.log(char_inventory)
@@ -107,6 +108,7 @@ export class CharacterSheetView extends ItemView {
         char_inventory,
         char_attacks,
         char_traits,
+        char_proficiencies,
       }
     });
   }
