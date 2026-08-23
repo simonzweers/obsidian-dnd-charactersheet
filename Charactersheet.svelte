@@ -455,6 +455,7 @@
           />
           <input
             class=""
+            checked={attack.proficient ?? false}
             type="checkbox"
             value={String(attack.proficient)}
             on:change={(e) => updateAttackField(index, "proficient", e.currentTarget.checked)}
@@ -542,7 +543,8 @@
   }
 
   .stat-row {
-    display: contents;
+    display: flex;
+    align-items: left;
     text-align: left;
   }
 
@@ -599,16 +601,19 @@
     line-height: 1;
   }
   .attack-table {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(6, max-content) auto;
     gap: 4px;
+    justify-content: start;
   }
 
   .attack-row {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.6fr auto;
-    gap: 6px;
-    align-items: center;
+    display: contents;
+    /* align-items: left; */
+  }
+
+  .attack-row button {
+    justify-self: end;
   }
 
   .attack-header {
