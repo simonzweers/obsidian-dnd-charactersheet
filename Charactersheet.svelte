@@ -973,7 +973,7 @@
 
   .stat-row {
     display: flex;
-    align-items: left;
+    align-items: center;
     text-align: left;
   }
 
@@ -997,8 +997,9 @@
 
   .abilities-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
+    grid-template-columns: repeat(3, max-content);
+    justify-content: center;
+    gap: 10px;
   }
   .ability-box {
     display: flex;
