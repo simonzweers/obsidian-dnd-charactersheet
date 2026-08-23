@@ -12,10 +12,14 @@ This is a simple DnD charactersheet viewer/editor. It enables the creation and v
 ## Installation
 
 This plugin is not yet available to install from within obsidian, so you need to install it manually.
+This also means you need to have `npm` installed.
 Execute the following commands inside your vault.
+
 ```bash
 cd <your-vault>
 git clone https://github.com/simonzweers/obsidian-dnd-charactersheet.git .obsidian/plugins/obsidian-dnd-charactersheet
+cd .obsidian/plugins/obsidian-dnd-charactersheet
+npm install && npm run build
 ```
 
 ## UI Preview
