@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
+	"id": "obsidian-dnd-charactersheet",
 	"name": "DnD Character Sheet Tool",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
+	"description": "This is a plugin that allows you to view charactersheets",
+	"author": "Simon Zweers",
 	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"fundingUrl": "https://github.com/simonzweers",
 	"isDesktopOnly": false
 }
