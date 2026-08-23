@@ -41,8 +41,10 @@ export class CharacterSheetView extends ItemView {
     const file = this.app.workspace.getActiveFile();
     const container = this.contentEl;
 
-    this.component?.$destroy();
-    this.component = null;
+    if (this.component) {
+      unmount(this.component);
+      this.component = null;
+    }
     container.empty();
 
     if (!file) {
