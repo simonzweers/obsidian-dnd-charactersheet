@@ -836,7 +836,7 @@
           on:click={() => moveTraitUp(index)}
           >↑</button>
           <span class="item-name">{trait}</span>
-          <button class="icon-btn" on:click={() => removeInventoryItem(index)}>✕</button>
+          <button class="icon-btn" on:click={() => removeTrait(index)}>✕</button>
         </li>
       {/each}
     </ul>
