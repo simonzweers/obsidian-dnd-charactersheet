@@ -47,7 +47,6 @@ Below you can see an example of the layout with a simple character.
 
 
 ## TODO
-- Add a "Open in browser" button for the spells
 - Add the ability to view and edit Race, Age, Height, etc.
 - Figure out how to provide build of plugin on github
 - Put Currency and inventory side by side
