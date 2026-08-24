@@ -46,6 +46,13 @@ export class CharacterSheetView extends ItemView {
 		void this.refresh();
 	}
 
+	private async handleCreateCharacterSheet(file: TFile) {
+		await this.app.fileManager.processFrontMatter(file, (fm) => {
+			fm.dnd_character = true;
+		})
+		void this.refresh();
+	}
+
 	async refresh() {
 		try {
 			const file = this.app.workspace.getActiveFile();
@@ -68,11 +75,8 @@ export class CharacterSheetView extends ItemView {
 				const createButton = container.createEl("button", {
 					text: "Create Character Sheet"
 				});
-				createButton.addEventListener("click", async () => {
-					await this.app.fileManager.processFrontMatter(file, (fm) => {
-						fm.dnd_character = true;
-					})
-					this.refresh();
+				createButton.addEventListener("click", () => {
+					void this.handleCreateCharacterSheet(file);
 				});
 				return;
 			}
