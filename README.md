@@ -48,8 +48,4 @@ Below you can see an example of the layout with a simple character.
 
 ## TODO
 - Add the ability to view and edit Race, Age, Height, etc.
-- Figure out how to provide build of plugin on github
-- Put Currency and inventory side by side
-- Give currency special colors to help differentiating the types
-- Fix some text-input not being able to be submitted with "Enter"
 
