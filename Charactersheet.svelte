@@ -402,6 +402,20 @@
     }
   }
 
+  async function openSpellInBrowser(levelKey:string, index: number) {
+	const spell =
+		levelKey === "cantrips"
+		? char_spells.cantrips[index]
+		: (char_spells[levelKey] as SpellLevel).learned[index];
+
+	if (!spell.link) {
+		new Notice("This spell has no link set");
+		return;
+	}
+	new Notice("Opening Spell in Browser");
+	window.open(spell.link, "_blank");
+  }
+
   // --- Move within its own level/cantrip list ---
   async function moveSpellUp(levelKey: string, index: number) {
     if (index === 0) return;
@@ -870,6 +884,7 @@
           <div class="spell-actions">
             <button class="icon-btn" title="Paste link" on:click={() => pasteSpellLink("cantrips", index)}>📋</button>
             <button class="icon-btn" title="Copy link" on:click={() => copySpellLink("cantrips", index)}>🔗</button>
+		 	<button class="icon-btn" title="Open in browser" on:click={() => openSpellInBrowser("cantrips", index)}>🌐</button>
             <button class="icon-btn" title="Move up" disabled={index === 0} on:click={() => moveSpellUp("cantrips", index)}>↑</button>
             <button class="icon-btn" title="Remove" on:click={() => removeSpell("cantrips", index)}>✕</button>
           </div>
@@ -926,6 +941,7 @@
           <div class="spell-actions">
               <button class="icon-btn" title="Paste link" on:click={() => pasteSpellLink(levelKey, index)}>📋</button>
               <button class="icon-btn" title="Copy link" on:click={() => copySpellLink(levelKey, index)}>🔗</button>
+			  <button class="icon-btn" title="Open in browser" on:click={() => openSpellInBrowser(levelKey, index)}>🌐</button>
               <button class="icon-btn" disabled={index === 0} title="Move up" on:click={() => moveSpellUp(levelKey, index)}>↑</button>
               <button class="icon-btn" title="Remove" on:click={() => removeSpell(levelKey, index)}>✕</button>
           </div>
