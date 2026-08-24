@@ -18,7 +18,7 @@ This is a simple DnD charactersheet viewer/editor. It enables the creation and v
 3. Seach for "DnD Character Sheet Tool"
 4. Install the Plugin
 
-### Install from spource
+### Install from source
 
 You can also install it directly from source.
 This also means you need to have `npm` installed.
