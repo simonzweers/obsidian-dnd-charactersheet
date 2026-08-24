@@ -718,7 +718,7 @@
     <div class="currency-row">
       {#each currencyKeys as coin}
         <label class="stat-row">
-          <span>{coin.toUpperCase()}</span>
+          <span class="coin-label coin-{coin}">{coin.toUpperCase()}</span>
           <input
             class="num-input"
             type="number"
@@ -1136,4 +1136,14 @@
     border-radius: 6px;
     padding: 0.4rem;
   }
+
+  .coin-label {
+    font-weight: bold;
+  }
+
+  .coin-cp { color: #b87333; } /* copper */
+  .coin-sp { color: #c0c0c0; } /* silver */
+  .coin-ep { color: #a8d8d8; } /* electrum - pale blue-green */
+  .coin-gp { color: #ffd700; } /* gold */
+  .coin-pp { color: #e5e4e2; } /* platinum */
 </style>
