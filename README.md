@@ -7,7 +7,7 @@ This is a simple DnD charactersheet viewer/editor. It enables the creation and v
 - Editing fields directly in the charactersheet view
 - Automatically calculate "calculated" fields such as Initiative, HP, Skills
 - Embed character sheet directly into file properties, to allow for additional writing inside the file
-- The ability to add links to saved spells, to allow for easy lookup
+- The ability to add links to saved spells, to allow for easy lookup and opening them in your browser
 
 ## Installation
 
