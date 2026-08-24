@@ -1,28 +1,6 @@
 <script lang="ts">
   import { type TFile, type App, Notice } from "obsidian";
-  interface Attack {
-    name: string;
-    ability: string;
-    proficient: boolean;
-    damage: string;
-    damage_type: string;
-  }
-  interface Spell {
-    name: string;
-    link: string;
-    prepared?: boolean;
-  }
-
-  interface SpellLevel {
-    total_slots: number;
-    slots_expended: number;
-    learned: Spell[];
-  }
-
-  interface CharSpells {
-    cantrips: Spell[];
-    [levelKey: string]: SpellLevel | Spell[];
-  }
+  import type {Attack, Spell, SpellLevel, CharSpells, DndCharacterFrontmatter} from './types'
 
   const MAX_SPELL_LEVEL = 9;
 

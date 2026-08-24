@@ -4,39 +4,9 @@ import { ItemView, WorkspaceLeaf, TFile, livePreviewState, Notice } from 'obsidi
 
 import Charactersheet from './Charactersheet.svelte';
 import {mount, unmount} from 'svelte'
+import type {Attack, DndCharacterFrontmatter} from './types'
 
 export const VIEW_TYPE_CHARACTERSHEET = 'dnd-charactersheet';
-
-interface Attack {
-	name: string;
-	ability: string;
-	proficient: boolean;
-	damage: string;
-	damage_type: string;
-}
-
-interface DndCharacterFrontmatter {
-	dnd_character?: boolean;
-	name?: string;
-	class?: string;
-	level?: number;
-	background?: string;
-	ac?: number;
-	speed?: number;
-	abilities?: Record<string, number>;
-	hp?: { current: number; max: number; temp: number };
-	proficiency_bonus?: number;
-	skills?: Record<string, boolean>;
-	saving_throws?: Record<string, boolean>;
-	currency?: Record<string, number>;
-	inventory?: string[];
-	attacks?: Attack[];
-	traits?: string[];
-	proficiencies?: string[];
-	spells?: Record<string, unknown>;
-	spellcasting?: string;
-	[key: string]: unknown; // fallback for any other frontmatter keys not explicitly modeled
-};
 
 export class CharacterSheetView extends ItemView {
 	private component: ReturnType<typeof mount> | null = null;
@@ -78,7 +48,7 @@ export class CharacterSheetView extends ItemView {
 	}
 
 	private async handleCreateCharacterSheet(file: TFile) {
-		await this.app.fileManager.processFrontMatter(file, (fm) => {
+		await this.app.fileManager.processFrontMatter(file, (fm: DndCharacterFrontmatter) => {
 			fm.dnd_character = true;
 		})
 		void this.refresh();
