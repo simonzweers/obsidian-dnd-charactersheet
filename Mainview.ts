@@ -70,8 +70,8 @@ export class CharacterSheetView extends ItemView {
 				return;
 			}
 
-			const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
-			if (!frontmatter) {
+			const rawFrontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
+			if (!rawFrontmatter) {
 				container.createEl("p", { text: "This note has no frontmatter."});
 				const createButton = container.createEl("button", {
 					text: "Create Character Sheet"
@@ -81,6 +81,7 @@ export class CharacterSheetView extends ItemView {
 				});
 				return;
 			}
+			const frontmatter = rawFrontmatter as DndCharacterFrontmatter;
 
 			const char_abilities = {
 				str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10,
@@ -104,14 +105,6 @@ export class CharacterSheetView extends ItemView {
 				cantrips: [],
 				...(frontmatter.spells ?? {}),
 			};
-
-			console.log(char_currency)
-			console.log(char_inventory)
-			console.log(char_attacks)
-			console.log(char_traits)
-			console.log(char_proficiencies)
-			console.log(char_spells)
-
 
 			// Attach the Svelte component to the ItemViews content element and provide the needed props.
 			this.component = mount(Charactersheet, {
