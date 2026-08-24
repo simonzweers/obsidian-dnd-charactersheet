@@ -64,12 +64,6 @@
 	color: var(--text-accent);
 }
 
-.currency-row {
-	display: flex;
-	gap: 6px;
-	flex-wrap: wrap;
-}
-
 .inventory-list {
 	list-style: none;
 	padding: 0;
@@ -179,3 +173,25 @@
 .coin-ep { color: #a8d8d8; } /* electrum - pale blue-green */
 .coin-gp { color: #ffd700; } /* gold */
 .coin-pp { color: #e5e4e2; } /* platinum */
+
+.money-inventory-row {
+	display: flex;
+	gap: 16px;
+	align-items: flex-start;
+}
+
+.money-section {
+	flex: 0 0 auto;
+}
+
+.inventory-section {
+	flex: 1;
+	min-width: 0;
+}
+
+.currency-row {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+

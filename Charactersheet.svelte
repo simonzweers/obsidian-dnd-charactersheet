@@ -712,50 +712,52 @@
     </div>
   </div>
 
+  <div class="money-inventory-row">
   <!-- MONEY -->
-  <div>
-    <h2>Money</h2>
-    <div class="currency-row">
-      {#each currencyKeys as coin}
-        <label class="stat-row">
-          <span class="coin-label coin-{coin}">{coin.toUpperCase()}</span>
-          <input
-            class="num-input"
-            type="number"
-            value={char_currency[coin]}
-            on:change={(e) => updateMoney(coin, Number(e.currentTarget.value))}
-          />
-        </label>
-      {/each}
+    <div class="money-section">
+      <h2>Money</h2>
+      <div class="currency-row">
+        {#each currencyKeys as coin}
+          <label class="stat-row">
+            <span class="coin-label coin-{coin}">{coin.toUpperCase()}</span>
+            <input
+              class="num-input"
+              type="number"
+              value={char_currency[coin]}
+              on:change={(e) => updateMoney(coin, Number(e.currentTarget.value))}
+            />
+          </label>
+        {/each}
+      </div>
     </div>
-  </div>
-
-  <!-- INVENTORY -->
-  <div>
-    <h2>Inventory</h2>
-    <ul class="inventory-list">
-      {#each char_inventory as item, index}
-        <li>
-          <button
-            class="icon-btn"
-            disabled={index === 0}
-            on:click={() => moveInventoryItemUp(index)}
-          >↑</button>
-          <span class="item-name">{item}</span>
-          <button class="icon-btn" on:click={() => removeInventoryItem(index)}>✕</button>
-        </li>
-      {/each}
-    </ul>
-
-    <div class="add-listitem-row">
-      <input
-        class="text-input"
-        type="text"
-        placeholder="New item"
-        bind:value={newItemName}
-        on:keydown={(e) => e.key === "Enter" && addInventoryItem()}
-      />
-      <button on:click={addInventoryItem}>Add</button>
+  
+    <!-- INVENTORY -->
+    <div class="inventory-section">
+      <h2>Inventory</h2>
+      <ul class="inventory-list">
+        {#each char_inventory as item, index}
+          <li>
+            <button
+              class="icon-btn"
+              disabled={index === 0}
+              on:click={() => moveInventoryItemUp(index)}
+            >↑</button>
+            <span class="item-name">{item}</span>
+            <button class="icon-btn" on:click={() => removeInventoryItem(index)}>✕</button>
+          </li>
+        {/each}
+      </ul>
+  
+      <div class="add-listitem-row">
+        <input
+          class="text-input"
+          type="text"
+          placeholder="New item"
+          bind:value={newItemName}
+          on:keydown={(e) => e.key === "Enter" && addInventoryItem()}
+        />
+        <button on:click={addInventoryItem}>Add</button>
+      </div>
     </div>
   </div>
 
