@@ -1,8 +1,181 @@
-/*
+.sheet-container {
+	/* display: flex;
+	flex-direction: column; */
+	gap: 9px;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.num-input {
+	width: 50px !important;
+}
+.text-input {
+	width: 100px !important;
+}
 
-If your plugin does not need CSS, delete this file.
+.stat-grid {
+	display: grid !important;
+	grid-template-columns: auto auto;
+	row-gap: 300px 300px;
+	align-items: center;
+	gap: 10px;
+	/* max-width: 400px; */
+}
 
-*/
+.stat-row {
+	display: flex;
+	align-items: center;
+	text-align: left;
+}
+
+.stat-row input {
+	margin-left: auto;
+}
+.stat-row .mod {
+	margin-left: auto;
+}
+
+.add-listitem-row {
+	display: flex;
+	align-items: left;
+	text-align: left;
+	gap: 6px;
+}
+
+.stat-row span {
+	padding-right: 10px;
+}
+
+.abilities-grid {
+	display: grid;
+	grid-template-columns: repeat(3, max-content);
+	justify-content: center;
+	gap: 10px;
+}
+.ability-box {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 110px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	padding: 0.4rem;
+}
+.mod {
+	font-weight: bold;
+	color: var(--text-accent);
+}
+
+.currency-row {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.inventory-list {
+	list-style: none;
+	padding: 0;
+	margin: 4px 0;
+}
+
+.inventory-list li {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 2px 0;
+}
+
+.item-name {
+	flex: 1;
+}
+
+.icon-btn {
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	line-height: 1;
+}
+.attack-table {
+	/* display: grid;
+	grid-template-columns: repeat(6, max-content) auto;
+	gap: 4px;
+	justify-content: start; */
+	list-style: none;
+	padding: 0;
+	margin: 4px 0
+}
+
+.attack-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 2px 0;
+}
+
+.attack-row button {
+	margin-left: auto;
+}
+
+.attack-header {
+	font-weight: bold;
+	font-size: 0.85em;
+	color: var(--text-muted);
+}
+
+.text-input.small {
+	width: 60px !important;
+}
+
+.spell-list {
+	list-style: none;
+	padding: 0;
+	margin: 4px 0;
+}
+
+.spell-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 2px 0;
+}
+
+.spell-name {
+	flex: 1;
+}
+
+.spell-actions {
+	display: flex;
+	gap: 4px;
+	margin-left: auto;
+}
+
+.slots-row {
+	display: flex;
+	gap: 12px;
+	margin-bottom: 4px;
+}
+
+.sc-extra-grid {
+	display: grid !important;
+	grid-template-columns: auto;
+	align-items: center;
+	gap: 10px;
+}
+
+.sc-extra-item {
+	display: flex;
+	align-items: center;
+	text-align: left; 
+	gap: 10px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	padding: 0.4rem;
+}
+
+.coin-label {
+	font-weight: bold;
+}
+
+.coin-cp { color: #b87333; } /* copper */
+.coin-sp { color: #c0c0c0; } /* silver */
+.coin-ep { color: #a8d8d8; } /* electrum - pale blue-green */
+.coin-gp { color: #ffd700; } /* gold */
+.coin-pp { color: #e5e4e2; } /* platinum */
