@@ -7,6 +7,37 @@ import {mount, unmount} from 'svelte'
 
 export const VIEW_TYPE_CHARACTERSHEET = 'dnd-charactersheet';
 
+interface Attack {
+	name: string;
+	ability: string;
+	proficient: boolean;
+	damage: string;
+	damage_type: string;
+}
+
+interface DndCharacterFrontmatter {
+	dnd_character?: boolean;
+	name?: string;
+	class?: string;
+	level?: number;
+	background?: string;
+	ac?: number;
+	speed?: number;
+	abilities?: Record<string, number>;
+	hp?: { current: number; max: number; temp: number };
+	proficiency_bonus?: number;
+	skills?: Record<string, boolean>;
+	saving_throws?: Record<string, boolean>;
+	currency?: Record<string, number>;
+	inventory?: string[];
+	attacks?: Attack[];
+	traits?: string[];
+	proficiencies?: string[];
+	spells?: Record<string, unknown>;
+	spellcasting?: string;
+	[key: string]: unknown; // fallback for any other frontmatter keys not explicitly modeled
+};
+
 export class CharacterSheetView extends ItemView {
 	private component: ReturnType<typeof mount> | null = null;
 	private currentFile: TFile | null = null;
@@ -96,13 +127,6 @@ export class CharacterSheetView extends ItemView {
 				...(frontmatter.currency ?? {}),
 			};
 			const char_inventory: string[] = frontmatter.inventory ?? [];
-			interface Attack {
-				name: string;
-				ability: string;
-				proficient: boolean;
-				damage: string;
-				damage_type: string;
-			}
 			const char_attacks: Attack[] = frontmatter.attacks ?? [];
 			const char_traits: string[] = frontmatter.traits ?? [];
 			const char_proficiencies: string[] = frontmatter.proficiencies ?? [];

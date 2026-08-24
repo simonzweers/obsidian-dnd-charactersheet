@@ -795,7 +795,7 @@
             checked={attack.proficient ?? false}
             type="checkbox"
             value={String(attack.proficient)}
-            on:change={(e) => updateAttackField(index, "proficient", e.currentTarget.checked)}
+            on:change={(e) => updateAttackField(index, "proficient", Boolean(e.currentTarget.checked))}
           />
           <input
             class="text-input small"
@@ -817,7 +817,7 @@
       <div class="attack-row attack-new">
         <input class="text-input" type="text" placeholder="Name" bind:value={newAttack.name} />
         <input class="text-input small" type="text" placeholder="str/dex/..." bind:value={newAttack.ability} />
-        <input class="" type="checkbox" placeholder="true/false" bind:value={newAttack.proficient} />
+        <input class="" type="checkbox" placeholder="true/false" bind:checked={newAttack.proficient} />
         <input class="text-input small" type="text" placeholder="1d6" bind:value={newAttack.damage} />
         <input class="text-input small" type="text" placeholder="slashing" bind:value={newAttack.damage_type} />
         <span></span>
