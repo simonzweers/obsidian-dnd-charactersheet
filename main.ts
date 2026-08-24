@@ -60,7 +60,7 @@ export default class CharacterSheet extends Plugin {
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		// this.addSettingTab(new SampleSettingsTab(this.app, this));
 
 		this.registerView(
 			VIEW_TYPE_CHARACTERSHEET,
