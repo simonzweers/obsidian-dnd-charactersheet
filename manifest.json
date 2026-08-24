@@ -3,7 +3,7 @@
 	"name": "DnD Character Sheet Tool",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This is a plugin that allows you to view charactersheets",
+	"description": "Create, Edit and View DnD charactersheets.",
 	"author": "Simon Zweers",
 	"authorUrl": "https://github.com/simonzweers",
 	"isDesktopOnly": true
