@@ -5,14 +5,14 @@
 }
 
 .num-input {
-	width: 50px !important;
+	width: 50px;
 }
 .text-input {
-	width: 100px !important;
+	width: 100px;
 }
 
 .stat-grid {
-	display: grid !important;
+	display: grid;
 	grid-template-columns: auto auto;
 	row-gap: 300px 300px;
 	align-items: center;
@@ -115,7 +115,7 @@
 }
 
 .text-input.small {
-	width: 60px !important;
+	width: 60px;
 }
 
 .spell-list {
@@ -148,7 +148,7 @@
 }
 
 .sc-extra-grid {
-	display: grid !important;
+	display: grid;
 	grid-template-columns: auto;
 	align-items: center;
 	gap: 10px;
