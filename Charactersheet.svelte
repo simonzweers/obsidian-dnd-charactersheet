@@ -861,7 +861,7 @@
     <div class="sc-extra-grid">
       <div class="sc-extra-item">
         <span>Spellcasting Ability</span>
-        <select id="sc-menu" name="sc-menu" on:change={(e) => updateSpellcasting(e.currentTarget.value)}>
+        <select id="sc-menu" name="sc-menu" value={char_spellcasting} on:change={(e) => updateSpellcasting(e.currentTarget.value)}>
           <option value="int">INT</option>
           <option value="wis">WIS</option>
           <option value="cha">CHA</option>
