@@ -11,7 +11,18 @@ This is a simple DnD charactersheet viewer/editor. It enables the creation and v
 
 ## Installation
 
+### Install from github release
+
 This plugin is not yet available to install from within obsidian, so you need to install it manually.
+
+1. Select one of the releases on github.
+2. Download the Source code (zip)
+3. Put the zip inside your vault plugins folder: `<your-vault>/.obsidian/plugins` 
+4. Unzip the plugin
+
+### Install from spource
+
+You can also install it directly from source.
 This also means you need to have `npm` installed.
 Execute the following commands inside your vault.
 
