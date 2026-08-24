@@ -66,7 +66,7 @@ export class CharacterSheetView extends ItemView {
 
 			if (!file) {
 				container.createEl("p", { text: "No Active File."});
-				return
+				return;
 			}
 
 			const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
