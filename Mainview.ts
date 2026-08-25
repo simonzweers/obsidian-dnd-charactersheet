@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, TFile, livePreviewState, Notice } from 'obsidian';
+import { ItemView, WorkspaceLeaf, TFile, Notice } from 'obsidian';
 
 // Import the Charactersheet Svelte component and the `mount` and `unmount` methods.
 
