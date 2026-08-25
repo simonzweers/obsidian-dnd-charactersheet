@@ -48,12 +48,13 @@ Below you can see an example of the layout with a simple character.
 
 ## TODO
 - Add the ability to view and edit:
-    - RaceAge
-    - Height
-    - Inspiration
-    - Alignment
-    - Death saves
-    - Hit Dice
+	- Race
+	- Age
+	- Height
+	- Inspiration
+	- Alignment
+	- Death saves
+	- Hit Dice
 - Fix bug where editing fist row of Attack/Spellcasting delets fields in second row
 - Add field for special properties like reach, disarming etc.
 - Add the ability to edit Features & Traits.
