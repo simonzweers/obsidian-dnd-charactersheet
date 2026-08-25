@@ -277,3 +277,8 @@
   color: var(--text-on-accent);
   border-color: var(--interactive-accent);
 }
+
+.item-name-input {
+  flex: 1;
+  width: auto; /* overrides .text-input's fixed 100px width */
+}

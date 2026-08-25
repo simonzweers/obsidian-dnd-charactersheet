@@ -307,6 +307,14 @@ async function addTrait() {
 			});
 }
 
+async function updateTrait(index: number, value: string) {
+  char_traits = char_traits.map((t, i) => (i === index ? value : t));
+  await app.fileManager.processFrontMatter(file, (frontmatter) => {
+    if (!frontmatter.traits) return;
+    frontmatter.traits[index] = value;
+  })
+}
+
 async function moveProficiencyUp(index: number) {
 	if (index === 0) return; // already at the top, nothing to do
 
@@ -986,7 +994,13 @@ function getSpellAttackBonus(proficiencyBonus: number, scAbility: string) {
           disabled={index === 0}
           on:click={() => moveTraitUp(index)}
           >↑</button>
-          <span class="item-name">{trait}</span>
+          <!-- <span class="item-name">{trait}</span> -->
+           <input
+             class="text-input item-name-input"
+             type="text"
+             value={trait}
+             on:change={(e) => updateTrait(index, String(e.currentTarget.value))}
+           />
           <button class="icon-btn" on:click={() => removeTrait(index)}>✕</button>
         </li>
       {/each}
