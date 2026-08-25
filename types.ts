@@ -4,7 +4,22 @@ export interface Attack {
 	proficient: boolean;
 	damage: string;
 	damage_type: string;
+	properties?: string[];
 }
+
+export const WEAPON_PROPERTIES = [
+  "finesse",
+  "light",
+  "heavy",
+  "reach",
+  "thrown",
+  "two-handed",
+  "versatile",
+  "ammunition",
+  "loading",
+] as const;
+
+export type WeaponProperty = (typeof WEAPON_PROPERTIES)[number];
 
 export interface Spell {
 	name: string;

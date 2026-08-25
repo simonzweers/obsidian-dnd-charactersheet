@@ -1,6 +1,7 @@
 <script lang="ts">
 import { type TFile, type App, Notice } from "obsidian";
 import type {Attack, Spell, SpellLevel, CharSpells, DndCharacterFrontmatter, DeathSaves, HitDice} from './types'
+import { WEAPON_PROPERTIES } from "./types";
 
 const MAX_SPELL_LEVEL = 9;
 
@@ -197,8 +198,14 @@ async function moveInventoryItemUp(index: number) {
 }
 
 function getAttackBonus(attack: Attack) {
-	const ability = attack.ability?.toLowerCase();
-	const base = char_abilities[ability] !== undefined ? getAbilityModifier(char_abilities[ability]) : 0;
+	const isFinesse = attack.properties?.includes("finesse") ?? false;
+
+  const abilityKeysToCheck = isFinesse ? ["str", "dex"] : [attack.ability?.toLowerCase()];
+  const best = Math.max(
+    ...abilityKeysToCheck.map((a) =>
+    char_abilities[a] !== undefined ? getAbilityModifier(char_abilities[a]) : -Infinity
+  ));
+  const base = best === -Infinity ? 0 : best;
 	const proficient = String(attack.proficient).toLowerCase() === "true";
 	return proficient ? base + char_proficiency_bonus : base;
 }
@@ -223,19 +230,45 @@ async function removeAttack(index: number) {
 			});
 }
 
-let newAttack: { name: string; ability: string; proficient: boolean; damage: string; damage_type: string } = { name: "", ability: "", proficient: false, damage: "", damage_type: "" };
+let newAttack: Attack = { name: "", ability: "", proficient: false, damage: "", damage_type: "" };
 
 async function addAttack() {
 	if (!newAttack.name.trim()) return;
 
-	const attackToAdd = { ...newAttack };
+	const attackToAdd: Attack = { ...newAttack, properties: newAttackProperties };
 	char_attacks = [...char_attacks, attackToAdd];
 	newAttack = { name: "", ability: "", proficient: false, damage: "", damage_type: "" };
+  newAttackProperties = [];
 
 	await app.fileManager.processFrontMatter(file, (frontmatter) => {
-			if (!frontmatter.attacks) frontmatter.attacks = [];
-			frontmatter.attacks.push(attackToAdd);
-			});
+		if (!frontmatter.attacks) frontmatter.attacks = [];
+		frontmatter.attacks.push(attackToAdd);
+	});
+}
+
+async function toggleAttackProperty(index: number, property: string) {
+  const attack = char_attacks[index];
+  const current = attack.properties ?? [];
+  const updatedProperties = current.includes(property)
+    ? current.filter((p) => p !== property)
+    : [...current, property];
+
+  char_attacks = char_attacks.map((atk, i) =>
+    i === index ? { ...atk, properties: updatedProperties } : atk
+  );
+
+  await app.fileManager.processFrontMatter(file, (frontmatter: DndCharacterFrontmatter) => {
+    if (!frontmatter.attacks) return;
+    frontmatter.attacks[index].properties = updatedProperties;
+  });
+}
+
+let newAttackProperties: string[] = [];
+
+function toggleNewAttackProperty(property: string) {
+  newAttackProperties = newAttackProperties.includes(property)
+    ? newAttackProperties.filter((p) => p !== property)
+    : [...newAttackProperties, property];
 }
 
 async function moveTraitUp(index: number) {
@@ -903,6 +936,19 @@ function getSpellAttackBonus(proficiencyBonus: number, scAbility: string) {
           <span class="mod">{formatModifier(getAttackBonus(attack))}</span>
           <button class="icon-btn" on:click={() => removeAttack(index)}>✕</button>
         </div>
+
+        <div class="attack-properties-row">
+          {#each WEAPON_PROPERTIES as prop}
+            <label class="property-tag" class:active={attack.properties?.includes(prop) ?? false}>
+              <input
+                type="checkbox"
+                checked={attack.properties?.includes(prop) ?? false}
+                on:change={() => toggleAttackProperty(index, prop)}
+              />
+              {prop}
+            </label>
+          {/each}
+        </div>
       {/each}
 
       <div class="attack-row attack-new">
@@ -913,6 +959,18 @@ function getSpellAttackBonus(proficiencyBonus: number, scAbility: string) {
         <input class="text-input small" type="text" placeholder="slashing" bind:value={newAttack.damage_type} />
         <span></span>
         <button on:click={addAttack}>Add</button>
+      </div>
+      <div class="attack-properties-row">
+        {#each WEAPON_PROPERTIES as prop}
+          <label class="property-tag" class:active={newAttackProperties.includes(prop)}>
+            <input
+              type="checkbox"
+              checked={newAttackProperties.includes(prop)}
+              on:change={() => toggleNewAttackProperty(prop)}
+            />
+            {prop}
+          </label>
+        {/each}
       </div>
     </div>
   </div>
