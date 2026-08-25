@@ -60,7 +60,7 @@ export class CharacterSheetView extends ItemView {
 			const container = this.contentEl;
 
 			if (this.component) {
-				unmount(this.component);
+				void unmount(this.component);
 				this.component = null;
 			}
 			container.empty();
@@ -140,7 +140,7 @@ export class CharacterSheetView extends ItemView {
 
 	async onClose() {
 		if (this.component) {
-			unmount(this.component);
+			void unmount(this.component);
 		}
 	}
 }

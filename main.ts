@@ -1,5 +1,5 @@
 import { CharacterSheetView, VIEW_TYPE_CHARACTERSHEET } from 'Mainview';
-import { App, Modal, Notice, Plugin, WorkspaceLeaf } from 'obsidian';
+import { Notice, Plugin, WorkspaceLeaf } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
 
@@ -80,7 +80,8 @@ export default class CharacterSheet extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		const loadedData = (await this.loadData()) as Partial<CharacterSheetSettings> | null;
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
 	}
 
 	async saveSettings() {
@@ -104,25 +105,27 @@ export default class CharacterSheet extends Plugin {
 			new Notice("Couldn't open the character sheet view.");
 			return;
 		}
-		workspace.revealLeaf(leaf);
+
+		// Maybe replace void with await?
+		void workspace.revealLeaf(leaf);
 	}
 }
 
-class CharacterSheetModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
-}
+// class CharacterSheetModal extends Modal {
+// 	constructor(app: App) {
+// 		super(app);
+// 	}
+//
+// 	onOpen() {
+// 		const {contentEl} = this;
+// 		contentEl.setText('Woah!');
+// 	}
+//
+// 	onClose() {
+// 		const {contentEl} = this;
+// 		contentEl.empty();
+// 	}
+// }
 
 // class SampleSettingTab extends PluginSettingTab {
 // 	plugin: CharacterSheet;
