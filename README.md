@@ -48,7 +48,6 @@ Below you can see an example of the layout with a simple character.
 
 ## TODO
 - Fix bug where editing fist row of Attack/Spellcasting delets fields in second row
-- Add field for special properties like reach, disarming etc.
 - Add the ability to edit Features & Traits.
 - Search web for spell name and add option to automatically add a link
 
