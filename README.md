@@ -43,7 +43,7 @@ npm install && npm run build
 
 Below you can see an example of the layout with a simple character.
 
-![example_ui](./images/example_ui.png)
+![example_ui](./images/example_ui_v1-2-1.png)
 
 
 ## TODO
