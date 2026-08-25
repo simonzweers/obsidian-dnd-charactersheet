@@ -733,7 +733,7 @@ function getSpellAttackBonus(proficiencyBonus: number, scAbility: string) {
   <div class="hp-block">
     <h2>HP</h2>
     <label>
-      HP
+      <span class="hitdice-remaining">CURRENT</span>
       <input
         type="number"
         class="num-input"
@@ -741,6 +741,7 @@ function getSpellAttackBonus(proficiencyBonus: number, scAbility: string) {
         on:change={(e) => updateHP("current", Number(e.currentTarget.value))}
       />
       <span style="font-weight: bold">+</span>
+      <span class="hitdice-remaining">TEMPORARY</span>
       <input
         type="number"
         class="num-input"
