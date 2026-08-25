@@ -221,3 +221,30 @@
 .deathsaves-label {
   width: 80px;
 }
+
+.hitdice-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin-top: 12px;
+}
+
+.hitdice-title {
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+}
+
+.hitdice-row {
+  display: flex;
+  gap: 12px;
+}
+
+.hitdice-remaining {
+  font-size: 0.9em;
+  color: var(--text-muted);
+}

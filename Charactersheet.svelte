@@ -1,6 +1,6 @@
 <script lang="ts">
 import { type TFile, type App, Notice } from "obsidian";
-import type {Attack, Spell, SpellLevel, CharSpells, DndCharacterFrontmatter, DeathSaves} from './types'
+import type {Attack, Spell, SpellLevel, CharSpells, DndCharacterFrontmatter, DeathSaves, HitDice} from './types'
 
 const MAX_SPELL_LEVEL = 9;
 
@@ -17,6 +17,7 @@ export let char_height: number;
 export let char_inspiration: number;
 export let char_alignment: string;
 export let char_deathsaves: DeathSaves;
+export let char_hit_dice: HitDice;
 export let char_speed: number;
 export let char_abilities: Record<string, number>;
 export let char_hp: Record<string, number>;
@@ -103,6 +104,15 @@ async function toggleDeathSave(type: "successes" | "failures", index: number) {
       frontmatter.deathsaves = { successes: [false, false, false], failures: [false, false, false] };
     }
     frontmatter.deathsaves[type][index] = updated[index];
+  });
+}
+
+async function updateHitDice(field: keyof HitDice, value: string | number) {
+  char_hit_dice = { ...char_hit_dice, [field]: value };
+
+  await app.fileManager.processFrontMatter(file, (frontmatter: DndCharacterFrontmatter) => {
+    if (!frontmatter.hit_dice) frontmatter.hit_dice = { total: 1, used: 0, die: "d8" };
+    frontmatter.hit_dice[field] = value as never;
   });
 }
 
@@ -608,6 +618,48 @@ function getSpellAttackBonus(proficiencyBonus: number, scAbility: string) {
       <span class="mod">{formatModifier(getAbilityModifier(char_abilities["dex"]))}</span>
     </div>
   </div>
+
+<!-- HIT DICE -->
+<div class="hitdice-block">
+  <span class="hitdice-title">Hit Dice</span>
+
+  <div class="hitdice-row">
+    <label class="stat-row">
+      <span>Total</span>
+      <input
+        class="num-input"
+        type="number"
+        value={char_hit_dice.total}
+        on:change={(e) => updateHitDice("total", Number(e.currentTarget.value))}
+      />
+    </label>
+
+    <label class="stat-row">
+      <span>Used</span>
+      <input
+        class="num-input"
+        type="number"
+        value={char_hit_dice.used}
+        on:change={(e) => updateHitDice("used", Number(e.currentTarget.value))}
+      />
+    </label>
+
+    <label class="stat-row">
+      <span>Die</span>
+      <input
+        class="text-input small"
+        type="text"
+        value={char_hit_dice.die}
+        on:change={(e) => updateHitDice("die", e.currentTarget.value)}
+      />
+    </label>
+  </div>
+
+  <div class="hitdice-remaining">
+    Remaining: <span class="mod">{char_hit_dice.total - char_hit_dice.used}{char_hit_dice.die}</span>
+  </div>
+
+</div>
 
   <!-- DEATH SAVES -->  
   <div class="deathsaves-block">

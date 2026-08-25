@@ -4,7 +4,7 @@ import { ItemView, WorkspaceLeaf, TFile, Notice } from 'obsidian';
 
 import Charactersheet from './Charactersheet.svelte';
 import {mount, unmount} from 'svelte'
-import type {Attack, DeathSaves, DndCharacterFrontmatter} from './types'
+import type {Attack, DeathSaves, DndCharacterFrontmatter, HitDice} from './types'
 
 export const VIEW_TYPE_CHARACTERSHEET = 'dnd-charactersheet';
 
@@ -110,6 +110,11 @@ export class CharacterSheetView extends ItemView {
 				failures: [false, false, false]
 			} as DeathSaves;
 
+			const char_hit_dice: HitDice = {
+				total: 1, used: 0, die: "d8",
+				...(frontmatter.hit_dice ?? {})
+			}
+
 			// Attach the Svelte component to the ItemViews content element and provide the needed props.
 			this.component = mount(Charactersheet, {
 				target: container,
@@ -128,6 +133,7 @@ export class CharacterSheetView extends ItemView {
 					char_inspiration: frontmatter.inspiration ?? 0,
 					char_alignment: frontmatter.alignment ?? "",
 					char_deathsaves,
+					char_hit_dice,
 					char_abilities,
 					char_hp,
 					char_proficiency_bonus: frontmatter.proficiency_bonus ?? 2,

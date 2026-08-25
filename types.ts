@@ -28,6 +28,12 @@ export interface DeathSaves {
 	failures: boolean[];
 }
 
+export interface HitDice {
+  total: number;
+  used: number;
+  die: string;
+}
+
 export interface DndCharacterFrontmatter {
 	dnd_character?: boolean;
 	name?: string;
@@ -42,6 +48,7 @@ export interface DndCharacterFrontmatter {
 	inspiration?: number;
 	alignment?: string;
 	deathsaves?: DeathSaves;
+	hit_dice?: HitDice;
 	abilities?: Record<string, number>;
 	hp?: { current: number; max: number; temp: number };
 	proficiency_bonus?: number;
