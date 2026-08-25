@@ -108,7 +108,7 @@ export class CharacterSheetView extends ItemView {
 			const char_deathsaves: DeathSaves = frontmatter.deathsaves ?? {
 				successes: [false, false, false],
 				failures: [false, false, false]
-			} as DeathSaves;
+			};
 
 			const char_hit_dice: HitDice = {
 				total: 1, used: 0, die: "d8",
