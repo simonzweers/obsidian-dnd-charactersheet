@@ -23,6 +23,11 @@ export interface CharSpells {
 	[levelKey: string]: SpellLevel | Spell[];
 }
 
+export interface DeathSaves {
+	successes: boolean[];
+	failures: boolean[];
+}
+
 export interface DndCharacterFrontmatter {
 	dnd_character?: boolean;
 	name?: string;
@@ -31,6 +36,12 @@ export interface DndCharacterFrontmatter {
 	background?: string;
 	ac?: number;
 	speed?: number;
+	race?: string;
+	age?: number;
+	height?: number;
+	inspiration?: number;
+	alignment?: string;
+	deathsaves?: DeathSaves;
 	abilities?: Record<string, number>;
 	hp?: { current: number; max: number; temp: number };
 	proficiency_bonus?: number;

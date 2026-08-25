@@ -1,386 +1,361 @@
 <script lang="ts">
-  import { type TFile, type App, Notice } from "obsidian";
-  import type {Attack, Spell, SpellLevel, CharSpells, DndCharacterFrontmatter} from './types'
-
-  const MAX_SPELL_LEVEL = 9;
-
-  export let app: App;
-  export let file: TFile;
-  export let char_name: string;
-  export let char_class: string;
-  export let char_level: number;
-  export let char_background: string;
-  export let char_ac: number;
-  export let char_speed: number;
-  export let char_abilities: Record<string, number>;
-  export let char_hp: Record<string, number>;
-  export let char_proficiency_bonus: number;
-  export let char_skills: Record<string, boolean>;
-  export let char_saving_throws: Record<string, boolean>;
-  export let char_currency: Record<string, number>;
-  export let char_inventory: string[];
-  export let char_attacks: Attack[];
-  export let char_traits: string[];
-  export let char_proficiencies: string[];
-  export let char_spells: CharSpells;
-  export let char_spellcasting: string;
-  // export let frontmatter: Record<string, any>;
-
-  function getAbilityModifier(score: number) {
-    return Math.floor((score - 10) / 2);
-  };
-  function getSkillModifier(base: number, proficient: boolean, bonus: number) {
-    return proficient ? base + bonus: base;
-  }
-  const formatModifier = (mod: number) => (mod >= 0 ? `+${mod}` : `${mod}`);
-
-  const abilityKeys = ["str", "dex", "con", "int", "wis", "cha"] as const;
-  const skillKeys = [
-    { skill: "Acrobatics", ability: "dex" },
-    { skill: "Animal Handling", ability: "wis" },
-    { skill: "Arcana", ability: "int" },
-    { skill: "Athletics", ability: "str" },
-    { skill: "Deception", ability: "cha" },
-    { skill: "History", ability: "int" },
-    { skill: "Insight", ability: "wis" },
-    { skill: "Intimidation", ability: "cha" },
-    { skill: "Investigation", ability: "int" },
-    { skill: "Medicine", ability: "wis" },
-    { skill: "Nature", ability: "int" },
-    { skill: "Perception", ability: "wis" },
-    { skill: "Performance", ability: "cha" },
-    { skill: "Persuasion", ability: "cha" },
-    { skill: "Religion", ability: "int" },
-    { skill: "Sleight of Hand", ability: "dex" },
-    { skill: "Stealth", ability: "dex" },
-    { skill: "Survival", ability: "wis" },
-  ] as const;
-
-  const currencyKeys = ["cp", "sp", "ep", "gp", "pp"] as const;
-  let newItemName = "";
-  let newTrait = "";
-  let newProficiency = "";
-
-  // all possible level keys, 1 through 9
-  const allLevelKeys = Array.from({ length: MAX_SPELL_LEVEL }, (_, i) => `lvl${i + 1}`);
-  const emptyLevel: SpellLevel = { total_slots: 0, slots_expended: 0, learned: [] };
-
-  // always returns a valid SpellLevel, even if the character has no data for it yet
-  function getLevel(levelKey: string): SpellLevel {
-    return (char_spells[levelKey] as SpellLevel) ?? emptyLevel;
-  }
-
-  $: spellLevelKeys = Object.keys(char_spells)
-    .filter((k) => k !== "cantrips")
-    .sort((a, b) => parseInt(a.replace("lvl", "")) - parseInt(b.replace("lvl", "")));
-
-  let newCantripName = "";
-  let newSpellNames: Record<string, string> = {}; // keyed by levelKey
-
-  async function updateLevel(newLevel: number) {
-    char_level = newLevel;
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      frontmatter.level = newLevel;
-    })
-  }
-
-  async function updateBackground(newLevel: string) {
-    char_background = newLevel;
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      frontmatter.background = newLevel;
-    })
-  }
-
-  async function updateClass(newClass: string) {
-    char_class = newClass;
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      frontmatter.class = newClass;
-    })
-  }
-
-  async function updateAc(newAc: number) {
-    char_ac = newAc;
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      frontmatter.ac = newAc;
-    })
-  }
-
-  async function updateSpeed(newSpeed: number) {
-    char_speed = newSpeed;
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      frontmatter.speed = newSpeed;
-    })
-  }
-
-  async function updateProficiencyBonus(newBonus: number) {
-    char_proficiency_bonus = newBonus;
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      frontmatter.proficiency_bonus = newBonus;
-    })
-  }
-
-  async function updateAbility(ability: string, level: number) {
-    char_abilities = { ...char_abilities, [ability]: level };
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.abilities) frontmatter.abilities = {};
-      frontmatter.abilities = char_abilities;
-    })
-  }
-
-  async function updateSkill(skill: string, proficiency: boolean) {
-    char_skills = { ...char_skills, [skill]: proficiency };
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.skills) frontmatter.skills = {};
-      frontmatter.skills[skill] = proficiency;
-    });
-  }
-
-  async function updateSavingThrow(ability: string, proficiency: boolean) {
-    char_saving_throws = { ...char_saving_throws, [ability]: proficiency};
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.saving_throws) frontmatter.saving_throws = {};
-      frontmatter.saving_throws = char_saving_throws;
-    })
-  }
-
-  async function updateHP(hpType: "current" | "max" | "temp", newHP: number) {
-    char_hp[hpType] = newHP;
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.hp) frontmatter.hp = {};
-      frontmatter.hp[hpType] = newHP;
-    })
-  }
-
-  async function updateMoney(currency: string, value: number) {
-    char_currency = { ...char_currency, [currency]: value };
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.currency) frontmatter.currency = {};
-      frontmatter.currency[currency] = value;
-    });
-  }
-
-  async function addInventoryItem() {
-    const item = newItemName.trim();
-    if (!item) return;
-
-    char_inventory = [...char_inventory, item];
-    newItemName = "";
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.inventory) frontmatter.inventory = [];
-      frontmatter.inventory.push(item);
-    });
-  }
-
-  async function removeInventoryItem(index: number) {
-    char_inventory = char_inventory.filter((_, i) => i !== index);
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.inventory) return;
-      frontmatter.inventory.splice(index, 1);
-    });
-  }
-
-  async function moveInventoryItemUp(index: number) {
-    if (index === 0) return; // already at the top, nothing to do
-
-    const updated = [...char_inventory];
-    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
-    char_inventory = updated;
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.inventory) return;
-      const fmInv = frontmatter.inventory;
-      [fmInv[index - 1], fmInv[index]] = [fmInv[index], fmInv[index - 1]];
-    });
-  }
-
-  function getAttackBonus(attack: Attack) {
-    const ability = attack.ability?.toLowerCase();
-    const base = char_abilities[ability] !== undefined ? getAbilityModifier(char_abilities[ability]) : 0;
-    const proficient = String(attack.proficient).toLowerCase() === "true";
-    return proficient ? base + char_proficiency_bonus : base;
-  }
-
-  async function updateAttackField(index: number, field: keyof Attack, value: string | boolean) {
-    char_attacks = char_attacks.map((atk, i) =>
-      i === index ? { ...atk, [field]: value } : atk
-    );
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.attacks) return;
-      frontmatter.attacks[index][field] = value;
-    });
-  }
-
-  async function removeAttack(index: number) {
-    char_attacks = char_attacks.filter((_, i) => i !== index);
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.attacks) return;
-      frontmatter.attacks.splice(index, 1);
-    });
-  }
-
-  let newAttack: { name: string; ability: string; proficient: boolean; damage: string; damage_type: string } = { name: "", ability: "", proficient: false, damage: "", damage_type: "" };
-
-  async function addAttack() {
-    if (!newAttack.name.trim()) return;
-
-    const attackToAdd = { ...newAttack };
-    char_attacks = [...char_attacks, attackToAdd];
-    newAttack = { name: "", ability: "", proficient: false, damage: "", damage_type: "" };
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.attacks) frontmatter.attacks = [];
-      frontmatter.attacks.push(attackToAdd);
-    });
-  }
-
-  async function moveTraitUp(index: number) {
-    if (index === 0) return; // already at the top, nothing to do
-
-    const updated = [...char_traits];
-    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
-    char_traits = updated;
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.traits) return;
-      const fmInv = frontmatter.trats;
-      [fmInv[index - 1], fmInv[index]] = [fmInv[index], fmInv[index - 1]];
-    });
-  }
-
-  async function removeTrait(index: number) {
-    char_traits = char_traits.filter((_, i) => i !== index);
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.traits) return;
-      frontmatter.traits.splice(index, 1);
-    });
-  }
-
-  async function addTrait() {
-    const item = newTrait.trim();
-    if (!item) return;
-
-    char_traits = [...char_traits, item];
-    newTrait = "";
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.traits) frontmatter.traits = [];
-      frontmatter.traits.push(item);
-    });
-  }
-
-  async function moveProficiencyUp(index: number) {
-    if (index === 0) return; // already at the top, nothing to do
-
-    const updated = [...char_proficiencies];
-    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
-    char_proficiencies = updated;
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.proficiencies) return;
-      const fmInv = frontmatter.proficiencies;
-      [fmInv[index - 1], fmInv[index]] = [fmInv[index], fmInv[index - 1]];
-    });
-  }
-
-  async function removeProficiency(index: number) {
-    char_proficiencies = char_proficiencies.filter((_, i) => i !== index);
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.proficiencies) return;
-      frontmatter.proficiencies.splice(index, 1);
-    });
-  }
-
-  async function addProficiency() {
-    const item = newProficiency.trim();
-    if (!item) return;
-
-    char_proficiencies = [...char_proficiencies, item];
-    newProficiency = "";
-
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.proficiencies) frontmatter.proficiencies = [];
-      frontmatter.proficiencies.push(item);
-    });
-  }
-
-  // --- Prepare toggle (leveled spells only) ---
-  async function toggleSpellPrepared(levelKey: string, index: number) {
-    const level = char_spells[levelKey] as SpellLevel;
-    const updatedLearned = level.learned.map((s, i) =>
-      i === index ? { ...s, prepared: !s.prepared } : s
-    );
-    char_spells = { ...char_spells, [levelKey]: { ...level, learned: updatedLearned } };
-
-    await app.fileManager.processFrontMatter(file, (fm) => {
-      if (!fm.spells?.[levelKey]?.learned) return;
-      fm.spells[levelKey].learned[index].prepared = updatedLearned[index].prepared;
-    });
-  }
-
-  // --- Clipboard: paste link into a spell ---
-  async function pasteSpellLink(levelKey: string, index: number) {
-    let text: string;
-    try {
-      text = await navigator.clipboard.readText();
-    } catch (err) {
-      new Notice("Couldn't read from clipboard");
-      console.log(err)
-      return;
-    }
-
-    if (levelKey === "cantrips") {
-      const updated = char_spells.cantrips.map((s, i) => (i === index ? { ...s, link: text } : s));
-      char_spells = { ...char_spells, cantrips: updated };
-
-      await app.fileManager.processFrontMatter(file, (fm) => {
-        if (!fm.spells?.cantrips) return;
-        fm.spells.cantrips[index].link = text;
-      });
-    } else {
-      const level = char_spells[levelKey] as SpellLevel;
-      const updatedLearned = level.learned.map((s, i) => (i === index ? { ...s, link: text } : s));
-      char_spells = { ...char_spells, [levelKey]: { ...level, learned: updatedLearned } };
-
-      await app.fileManager.processFrontMatter(file, (fm) => {
-        if (!fm.spells?.[levelKey]?.learned) return;
-        fm.spells[levelKey].learned[index].link = text;
-      });
-    }
-
-    new Notice("Pasted link");
-  }
-
-  // --- Clipboard: copy link from a spell ---
-  async function copySpellLink(levelKey: string, index: number) {
-    const spell =
-      levelKey === "cantrips"
-        ? char_spells.cantrips[index]
-        : (char_spells[levelKey] as SpellLevel).learned[index];
-
-    if (!spell.link) {
-      new Notice("This spell has no link set");
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(spell.link);
-      new Notice("Copied link to clipboard");
-    } catch (err) {
-      new Notice("Couldn't write to clipboard");
-    }
-  }
-
-  async function openSpellInBrowser(levelKey:string, index: number) {
+import { type TFile, type App, Notice } from "obsidian";
+import type {Attack, Spell, SpellLevel, CharSpells, DndCharacterFrontmatter, DeathSaves} from './types'
+
+const MAX_SPELL_LEVEL = 9;
+
+export let app: App;
+export let file: TFile;
+export let char_name: string;
+export let char_class: string;
+export let char_level: number;
+export let char_background: string;
+export let char_ac: number;
+export let char_race: string;
+export let char_age: number;
+export let char_height: number;
+export let char_inspiration: number;
+export let char_alignment: string;
+export let char_deathsaves: DeathSaves;
+export let char_speed: number;
+export let char_abilities: Record<string, number>;
+export let char_hp: Record<string, number>;
+export let char_proficiency_bonus: number;
+export let char_skills: Record<string, boolean>;
+export let char_saving_throws: Record<string, boolean>;
+export let char_currency: Record<string, number>;
+export let char_inventory: string[];
+export let char_attacks: Attack[];
+export let char_traits: string[];
+export let char_proficiencies: string[];
+export let char_spells: CharSpells;
+export let char_spellcasting: string;
+// export let frontmatter: Record<string, any>;
+
+function getAbilityModifier(score: number) {
+	return Math.floor((score - 10) / 2);
+};
+function getSkillModifier(base: number, proficient: boolean, bonus: number) {
+	return proficient ? base + bonus: base;
+}
+const formatModifier = (mod: number) => (mod >= 0 ? `+${mod}` : `${mod}`);
+
+const abilityKeys = ["str", "dex", "con", "int", "wis", "cha"] as const;
+const skillKeys = [
+{ skill: "Acrobatics", ability: "dex" },
+{ skill: "Animal Handling", ability: "wis" },
+{ skill: "Arcana", ability: "int" },
+{ skill: "Athletics", ability: "str" },
+{ skill: "Deception", ability: "cha" },
+{ skill: "History", ability: "int" },
+{ skill: "Insight", ability: "wis" },
+{ skill: "Intimidation", ability: "cha" },
+{ skill: "Investigation", ability: "int" },
+{ skill: "Medicine", ability: "wis" },
+{ skill: "Nature", ability: "int" },
+{ skill: "Perception", ability: "wis" },
+{ skill: "Performance", ability: "cha" },
+{ skill: "Persuasion", ability: "cha" },
+{ skill: "Religion", ability: "int" },
+{ skill: "Sleight of Hand", ability: "dex" },
+{ skill: "Stealth", ability: "dex" },
+{ skill: "Survival", ability: "wis" },
+] as const;
+
+const currencyKeys = ["cp", "sp", "ep", "gp", "pp"] as const;
+let newItemName = "";
+let newTrait = "";
+let newProficiency = "";
+
+// all possible level keys, 1 through 9
+const allLevelKeys = Array.from({ length: MAX_SPELL_LEVEL }, (_, i) => `lvl${i + 1}`);
+const emptyLevel: SpellLevel = { total_slots: 0, slots_expended: 0, learned: [] };
+
+// always returns a valid SpellLevel, even if the character has no data for it yet
+function getLevel(levelKey: string): SpellLevel {
+	return (char_spells[levelKey] as SpellLevel) ?? emptyLevel;
+}
+
+$: spellLevelKeys = Object.keys(char_spells)
+.filter((k) => k !== "cantrips")
+.sort((a, b) => parseInt(a.replace("lvl", "")) - parseInt(b.replace("lvl", "")));
+
+let newCantripName = "";
+let newSpellNames: Record<string, string> = {}; // keyed by levelKey
+
+async function updatePrimitiveField<K extends keyof DndCharacterFrontmatter>(
+	setter: (value: NonNullable<DndCharacterFrontmatter[K]>) => void,
+	field: K,
+	value: NonNullable<DndCharacterFrontmatter[K]>
+	) {
+	setter(value);
+	await app.fileManager.processFrontMatter(file, (frontmatter: DndCharacterFrontmatter) => {
+		frontmatter[field] = value;
+	});
+}
+
+async function updateAbility(ability: string, level: number) {
+	char_abilities = { ...char_abilities, [ability]: level };
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.abilities) frontmatter.abilities = {};
+			frontmatter.abilities = char_abilities;
+			})
+}
+
+async function updateSkill(skill: string, proficiency: boolean) {
+	char_skills = { ...char_skills, [skill]: proficiency };
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.skills) frontmatter.skills = {};
+			frontmatter.skills[skill] = proficiency;
+			});
+}
+
+async function updateSavingThrow(ability: string, proficiency: boolean) {
+	char_saving_throws = { ...char_saving_throws, [ability]: proficiency};
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.saving_throws) frontmatter.saving_throws = {};
+			frontmatter.saving_throws = char_saving_throws;
+			})
+}
+
+async function updateHP(hpType: "current" | "max" | "temp", newHP: number) {
+	char_hp[hpType] = newHP;
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.hp) frontmatter.hp = {};
+			frontmatter.hp[hpType] = newHP;
+			})
+}
+
+async function updateMoney(currency: string, value: number) {
+	char_currency = { ...char_currency, [currency]: value };
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.currency) frontmatter.currency = {};
+			frontmatter.currency[currency] = value;
+			});
+}
+
+async function addInventoryItem() {
+	const item = newItemName.trim();
+	if (!item) return;
+
+	char_inventory = [...char_inventory, item];
+	newItemName = "";
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.inventory) frontmatter.inventory = [];
+			frontmatter.inventory.push(item);
+			});
+}
+
+async function removeInventoryItem(index: number) {
+	char_inventory = char_inventory.filter((_, i) => i !== index);
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.inventory) return;
+			frontmatter.inventory.splice(index, 1);
+			});
+}
+
+async function moveInventoryItemUp(index: number) {
+	if (index === 0) return; // already at the top, nothing to do
+
+	const updated = [...char_inventory];
+	[updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+	char_inventory = updated;
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.inventory) return;
+			const fmInv = frontmatter.inventory;
+			[fmInv[index - 1], fmInv[index]] = [fmInv[index], fmInv[index - 1]];
+			});
+}
+
+function getAttackBonus(attack: Attack) {
+	const ability = attack.ability?.toLowerCase();
+	const base = char_abilities[ability] !== undefined ? getAbilityModifier(char_abilities[ability]) : 0;
+	const proficient = String(attack.proficient).toLowerCase() === "true";
+	return proficient ? base + char_proficiency_bonus : base;
+}
+
+async function updateAttackField(index: number, field: keyof Attack, value: string | boolean) {
+	char_attacks = char_attacks.map((atk, i) =>
+			i === index ? { ...atk, [field]: value } : atk
+			);
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.attacks) return;
+			frontmatter.attacks[index][field] = value;
+			});
+}
+
+async function removeAttack(index: number) {
+	char_attacks = char_attacks.filter((_, i) => i !== index);
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.attacks) return;
+			frontmatter.attacks.splice(index, 1);
+			});
+}
+
+let newAttack: { name: string; ability: string; proficient: boolean; damage: string; damage_type: string } = { name: "", ability: "", proficient: false, damage: "", damage_type: "" };
+
+async function addAttack() {
+	if (!newAttack.name.trim()) return;
+
+	const attackToAdd = { ...newAttack };
+	char_attacks = [...char_attacks, attackToAdd];
+	newAttack = { name: "", ability: "", proficient: false, damage: "", damage_type: "" };
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.attacks) frontmatter.attacks = [];
+			frontmatter.attacks.push(attackToAdd);
+			});
+}
+
+async function moveTraitUp(index: number) {
+	if (index === 0) return; // already at the top, nothing to do
+
+	const updated = [...char_traits];
+	[updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+	char_traits = updated;
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.traits) return;
+			const fmInv = frontmatter.trats;
+			[fmInv[index - 1], fmInv[index]] = [fmInv[index], fmInv[index - 1]];
+			});
+}
+
+async function removeTrait(index: number) {
+	char_traits = char_traits.filter((_, i) => i !== index);
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.traits) return;
+			frontmatter.traits.splice(index, 1);
+			});
+}
+
+async function addTrait() {
+	const item = newTrait.trim();
+	if (!item) return;
+
+	char_traits = [...char_traits, item];
+	newTrait = "";
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.traits) frontmatter.traits = [];
+			frontmatter.traits.push(item);
+			});
+}
+
+async function moveProficiencyUp(index: number) {
+	if (index === 0) return; // already at the top, nothing to do
+
+	const updated = [...char_proficiencies];
+	[updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+	char_proficiencies = updated;
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.proficiencies) return;
+			const fmInv = frontmatter.proficiencies;
+			[fmInv[index - 1], fmInv[index]] = [fmInv[index], fmInv[index - 1]];
+			});
+}
+
+async function removeProficiency(index: number) {
+	char_proficiencies = char_proficiencies.filter((_, i) => i !== index);
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.proficiencies) return;
+			frontmatter.proficiencies.splice(index, 1);
+			});
+}
+
+async function addProficiency() {
+	const item = newProficiency.trim();
+	if (!item) return;
+
+	char_proficiencies = [...char_proficiencies, item];
+	newProficiency = "";
+
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.proficiencies) frontmatter.proficiencies = [];
+			frontmatter.proficiencies.push(item);
+			});
+}
+
+// --- Prepare toggle (leveled spells only) ---
+async function toggleSpellPrepared(levelKey: string, index: number) {
+	const level = char_spells[levelKey] as SpellLevel;
+	const updatedLearned = level.learned.map((s, i) =>
+			i === index ? { ...s, prepared: !s.prepared } : s
+			);
+	char_spells = { ...char_spells, [levelKey]: { ...level, learned: updatedLearned } };
+
+	await app.fileManager.processFrontMatter(file, (fm) => {
+			if (!fm.spells?.[levelKey]?.learned) return;
+			fm.spells[levelKey].learned[index].prepared = updatedLearned[index].prepared;
+			});
+}
+
+// --- Clipboard: paste link into a spell ---
+async function pasteSpellLink(levelKey: string, index: number) {
+	let text: string;
+	try {
+		text = await navigator.clipboard.readText();
+	} catch (err) {
+		new Notice("Couldn't read from clipboard");
+		console.log(err)
+			return;
+	}
+
+	if (levelKey === "cantrips") {
+		const updated = char_spells.cantrips.map((s, i) => (i === index ? { ...s, link: text } : s));
+		char_spells = { ...char_spells, cantrips: updated };
+
+		await app.fileManager.processFrontMatter(file, (fm) => {
+				if (!fm.spells?.cantrips) return;
+				fm.spells.cantrips[index].link = text;
+				});
+	} else {
+		const level = char_spells[levelKey] as SpellLevel;
+		const updatedLearned = level.learned.map((s, i) => (i === index ? { ...s, link: text } : s));
+		char_spells = { ...char_spells, [levelKey]: { ...level, learned: updatedLearned } };
+
+		await app.fileManager.processFrontMatter(file, (fm) => {
+				if (!fm.spells?.[levelKey]?.learned) return;
+				fm.spells[levelKey].learned[index].link = text;
+				});
+	}
+
+	new Notice("Pasted link");
+}
+
+// --- Clipboard: copy link from a spell ---
+async function copySpellLink(levelKey: string, index: number) {
+	const spell =
+		levelKey === "cantrips"
+		? char_spells.cantrips[index]
+		: (char_spells[levelKey] as SpellLevel).learned[index];
+
+	if (!spell.link) {
+		new Notice("This spell has no link set");
+		return;
+	}
+
+	try {
+		await navigator.clipboard.writeText(spell.link);
+		new Notice("Copied link to clipboard");
+	} catch (err) {
+		new Notice("Couldn't write to clipboard");
+	}
+}
+
+async function openSpellInBrowser(levelKey:string, index: number) {
 	const spell =
 		levelKey === "cantrips"
 		? char_spells.cantrips[index]
@@ -392,118 +367,118 @@
 	}
 	new Notice("Opening Spell in Browser");
 	window.open(spell.link, "_blank");
-  }
+}
 
-  // --- Move within its own level/cantrip list ---
-  async function moveSpellUp(levelKey: string, index: number) {
-    if (index === 0) return;
+// --- Move within its own level/cantrip list ---
+async function moveSpellUp(levelKey: string, index: number) {
+	if (index === 0) return;
 
-    if (levelKey === "cantrips") {
-      const updated = [...char_spells.cantrips];
-      [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
-      char_spells = { ...char_spells, cantrips: updated };
+	if (levelKey === "cantrips") {
+		const updated = [...char_spells.cantrips];
+		[updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+		char_spells = { ...char_spells, cantrips: updated };
 
-      await app.fileManager.processFrontMatter(file, (fm) => {
-        if (!fm.spells?.cantrips) return;
-        const arr = fm.spells.cantrips;
-        [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
-      });
-    } else {
-      const level = char_spells[levelKey] as SpellLevel;
-      const updatedLearned = [...level.learned];
-      [updatedLearned[index - 1], updatedLearned[index]] = [updatedLearned[index], updatedLearned[index - 1]];
-      char_spells = { ...char_spells, [levelKey]: { ...level, learned: updatedLearned } };
+		await app.fileManager.processFrontMatter(file, (fm) => {
+				if (!fm.spells?.cantrips) return;
+				const arr = fm.spells.cantrips;
+				[arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
+				});
+	} else {
+		const level = char_spells[levelKey] as SpellLevel;
+		const updatedLearned = [...level.learned];
+		[updatedLearned[index - 1], updatedLearned[index]] = [updatedLearned[index], updatedLearned[index - 1]];
+		char_spells = { ...char_spells, [levelKey]: { ...level, learned: updatedLearned } };
 
-      await app.fileManager.processFrontMatter(file, (fm) => {
-        if (!fm.spells?.[levelKey]?.learned) return;
-        const arr = fm.spells[levelKey].learned;
-        [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
-      });
-    }
-  }
+		await app.fileManager.processFrontMatter(file, (fm) => {
+				if (!fm.spells?.[levelKey]?.learned) return;
+				const arr = fm.spells[levelKey].learned;
+				[arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
+				});
+	}
+}
 
-  // --- Remove ---
-  async function removeSpell(levelKey: string, index: number) {
-    if (levelKey === "cantrips") {
-      char_spells = { ...char_spells, cantrips: char_spells.cantrips.filter((_, i) => i !== index) };
+// --- Remove ---
+async function removeSpell(levelKey: string, index: number) {
+	if (levelKey === "cantrips") {
+		char_spells = { ...char_spells, cantrips: char_spells.cantrips.filter((_, i) => i !== index) };
 
-      await app.fileManager.processFrontMatter(file, (fm) => {
-        if (!fm.spells?.cantrips) return;
-        fm.spells.cantrips.splice(index, 1);
-      });
-    } else {
-      const level = char_spells[levelKey] as SpellLevel;
-      const updatedLearned = level.learned.filter((_, i) => i !== index);
-      char_spells = { ...char_spells, [levelKey]: { ...level, learned: updatedLearned } };
+		await app.fileManager.processFrontMatter(file, (fm) => {
+				if (!fm.spells?.cantrips) return;
+				fm.spells.cantrips.splice(index, 1);
+				});
+	} else {
+		const level = char_spells[levelKey] as SpellLevel;
+		const updatedLearned = level.learned.filter((_, i) => i !== index);
+		char_spells = { ...char_spells, [levelKey]: { ...level, learned: updatedLearned } };
 
-      await app.fileManager.processFrontMatter(file, (fm) => {
-        if (!fm.spells?.[levelKey]?.learned) return;
-        fm.spells[levelKey].learned.splice(index, 1);
-      });
-    }
-  }
+		await app.fileManager.processFrontMatter(file, (fm) => {
+				if (!fm.spells?.[levelKey]?.learned) return;
+				fm.spells[levelKey].learned.splice(index, 1);
+				});
+	}
+}
 
-  // --- Add new ---
-  async function addCantrip() {
-    const name = newCantripName.trim();
-    if (!name) return;
+// --- Add new ---
+async function addCantrip() {
+	const name = newCantripName.trim();
+	if (!name) return;
 
-    const spell: Spell = { name, link: "" };
-    char_spells = { ...char_spells, cantrips: [...char_spells.cantrips, spell] };
-    newCantripName = "";
+	const spell: Spell = { name, link: "" };
+	char_spells = { ...char_spells, cantrips: [...char_spells.cantrips, spell] };
+	newCantripName = "";
 
-    await app.fileManager.processFrontMatter(file, (fm) => {
-      if (!fm.spells) fm.spells = {};
-      if (!fm.spells.cantrips) fm.spells.cantrips = [];
-      fm.spells.cantrips.push(spell);
-    });
-  }
+	await app.fileManager.processFrontMatter(file, (fm) => {
+			if (!fm.spells) fm.spells = {};
+			if (!fm.spells.cantrips) fm.spells.cantrips = [];
+			fm.spells.cantrips.push(spell);
+			});
+}
 
-  async function addSpell(levelKey: string) {
-    const name = (newSpellNames[levelKey] ?? "").trim();
-    if (!name) return;
+async function addSpell(levelKey: string) {
+	const name = (newSpellNames[levelKey] ?? "").trim();
+	if (!name) return;
 
-    const spell: Spell = { name, prepared: false, link: "" };
-    const level = getLevel(levelKey);
-    char_spells = { ...char_spells, [levelKey]: { ...level, learned: [...level.learned, spell] } };
-    newSpellNames = { ...newSpellNames, [levelKey]: "" };
+	const spell: Spell = { name, prepared: false, link: "" };
+	const level = getLevel(levelKey);
+	char_spells = { ...char_spells, [levelKey]: { ...level, learned: [...level.learned, spell] } };
+	newSpellNames = { ...newSpellNames, [levelKey]: "" };
 
-    await app.fileManager.processFrontMatter(file, (fm) => {
-      if (!fm.spells) fm.spells = {};
-      if (!fm.spells[levelKey]) fm.spells[levelKey] = { total_slots: 0, slots_expended: 0, learned: [] };
-      fm.spells[levelKey].learned.push(spell);
-    });
-  }
+	await app.fileManager.processFrontMatter(file, (fm) => {
+			if (!fm.spells) fm.spells = {};
+			if (!fm.spells[levelKey]) fm.spells[levelKey] = { total_slots: 0, slots_expended: 0, learned: [] };
+			fm.spells[levelKey].learned.push(spell);
+			});
+}
 
-  // --- Slot counters ---
-  async function updateSlots(levelKey: string, field: "total_slots" | "slots_expended", value: number) {
-    const level = getLevel(levelKey);
-    char_spells = { ...char_spells, [levelKey]: { ...level, [field]: value } };
+// --- Slot counters ---
+async function updateSlots(levelKey: string, field: "total_slots" | "slots_expended", value: number) {
+	const level = getLevel(levelKey);
+	char_spells = { ...char_spells, [levelKey]: { ...level, [field]: value } };
 
-    await app.fileManager.processFrontMatter(file, (fm) => {
-      if (!fm.spells) fm.spells = {};
-      if (!fm.spells[levelKey]) fm.spells[levelKey] = { total_slots: 0, slots_expended: 0, learned: [] };
-      fm.spells[levelKey][field] = value;
-    });
-  }
+	await app.fileManager.processFrontMatter(file, (fm) => {
+			if (!fm.spells) fm.spells = {};
+			if (!fm.spells[levelKey]) fm.spells[levelKey] = { total_slots: 0, slots_expended: 0, learned: [] };
+			fm.spells[levelKey][field] = value;
+			});
+}
 
-  async function updateSpellcasting(newSpellcasting: string) {
-    char_spellcasting = newSpellcasting;
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
-      if (!frontmatter.spellcasting) frontmatter.spellcasting = {}
-      frontmatter.spellcasting = newSpellcasting;
-    })
-  }
+async function updateSpellcasting(newSpellcasting: string) {
+	char_spellcasting = newSpellcasting;
+	await app.fileManager.processFrontMatter(file, (frontmatter) => {
+			if (!frontmatter.spellcasting) frontmatter.spellcasting = {}
+			frontmatter.spellcasting = newSpellcasting;
+			})
+}
 
-  function getSpellsaveDC(proficiencyBonus: number, scAbility: string) {
-    let spellSaveDC = 8 + proficiencyBonus + getAbilityModifier(char_abilities[scAbility]);
-    return spellSaveDC;
-  }
+function getSpellsaveDC(proficiencyBonus: number, scAbility: string) {
+	let spellSaveDC = 8 + proficiencyBonus + getAbilityModifier(char_abilities[scAbility]);
+	return spellSaveDC;
+}
 
-  function getSpellAttackBonus(proficiencyBonus: number, scAbility: string) {
-    let spellAttackBonus = proficiencyBonus + getAbilityModifier(char_abilities[scAbility]);
-    return spellAttackBonus;
-  }
+function getSpellAttackBonus(proficiencyBonus: number, scAbility: string) {
+	let spellAttackBonus = proficiencyBonus + getAbilityModifier(char_abilities[scAbility]);
+	return spellAttackBonus;
+}
 </script>
 
 <div class="sheet-container">
@@ -515,8 +490,8 @@
       class="text-input"
       type="text"
       value={char_class}
-      on:change={(e) => updateClass(String(e.currentTarget.value))}
-      />
+      on:change={(e) => updatePrimitiveField( (v) => (char_class = v), "class", e.currentTarget.value)}
+      >
     </div>
 
     <div class="stat-row">
@@ -525,7 +500,7 @@
       class="num-input"
       type="number"
       value={char_level}
-      on:change={(e) => updateLevel(Number(e.currentTarget.value))}
+      on:change={(e) => updatePrimitiveField( (v) => (char_level = v), "level", Number(e.currentTarget.value))}
       />
     </div>
 
@@ -535,7 +510,7 @@
       class="text-input"
       type="text"
       value={char_background}
-      on:change={(e) => updateBackground(String(e.currentTarget.value))}
+      on:change={(e) => updatePrimitiveField( (v) => (char_background = v), "background", String(e.currentTarget.value))}
       />
     </div>
 
@@ -545,7 +520,7 @@
       class="num-input"
       type="number"
       value={char_proficiency_bonus}
-      on:change={(e) => updateProficiencyBonus(Number(e.currentTarget.value))}
+      on:change={(e) => updatePrimitiveField( (v) => (char_proficiency_bonus = v), "proficiency_bonus", Number(e.currentTarget.value))}
       />
     </div>
 
@@ -555,7 +530,7 @@
       class="num-input"
       type="number"
       value={char_ac}
-      on:change={(e) => updateAc(Number(e.currentTarget.value))}
+      on:change={(e) => updatePrimitiveField( (v) => (char_ac = v), "ac", Number(e.currentTarget.value))}
       />
     </div>
 
@@ -565,7 +540,7 @@
       class="num-input"
       type="number"
       value={char_speed}
-      on:change={(e) => updateSpeed(Number(e.currentTarget.value))}
+      on:change={(e) => updatePrimitiveField( (v) => (char_speed = v), "speed", Number(e.currentTarget.value))}
       />
     </div>
 
