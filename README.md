@@ -48,6 +48,6 @@ Below you can see an example of the layout with a simple character.
 
 ## TODO
 - Fix bug where editing fist row of Attack/Spellcasting delets fields in second row
-- Add the ability to edit Features & Traits.
 - Search web for spell name and add option to automatically add a link
+- Add buttons for processing damage
 
