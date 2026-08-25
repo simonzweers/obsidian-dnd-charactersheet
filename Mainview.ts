@@ -105,7 +105,10 @@ export class CharacterSheetView extends ItemView {
 				cantrips: [],
 				...(frontmatter.spells ?? {}),
 			};
-			const char_deathsaves: DeathSaves = frontmatter.deathsaves ?? {} as DeathSaves;
+			const char_deathsaves: DeathSaves = frontmatter.deathsaves ?? {
+				successes: [false, false, false],
+				failures: [false, false, false]
+			} as DeathSaves;
 
 			// Attach the Svelte component to the ItemViews content element and provide the needed props.
 			this.component = mount(Charactersheet, {

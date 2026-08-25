@@ -195,3 +195,29 @@
 	gap: 6px;
 }
 
+.deathsaves-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin-top: 12px;
+}
+
+.deathsaves-title {
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+}
+
+.deathsaves-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.deathsaves-label {
+  width: 80px;
+}

@@ -94,6 +94,18 @@ async function updatePrimitiveField<K extends keyof DndCharacterFrontmatter>(
 	});
 }
 
+async function toggleDeathSave(type: "successes" | "failures", index: number) {
+  const updated = char_deathsaves[type].map((v, i) => (i === index ? !v : v));
+  char_deathsaves = { ...char_deathsaves, [type]: updated };
+
+  await app.fileManager.processFrontMatter(file, (frontmatter: DndCharacterFrontmatter) => {
+    if (!frontmatter.deathsaves) {
+      frontmatter.deathsaves = { successes: [false, false, false], failures: [false, false, false] };
+    }
+    frontmatter.deathsaves[type][index] = updated[index];
+  });
+}
+
 async function updateAbility(ability: string, level: number) {
 	char_abilities = { ...char_abilities, [ability]: level };
 	await app.fileManager.processFrontMatter(file, (frontmatter) => {
@@ -544,9 +556,83 @@ function getSpellAttackBonus(proficiencyBonus: number, scAbility: string) {
       />
     </div>
 
+	
+    <div class="stat-row">
+      <span>Race</span>
+      <input
+      class="text-input"
+      type="text"
+      value={char_race}
+      on:change={(e) => updatePrimitiveField( (v) => (char_race = v), "race", String(e.currentTarget.value))}
+      />
+    </div>
+
+    <div class="stat-row">
+      <span>Age</span>
+      <input
+      class="num-input"
+      type="number"
+      value={char_age}
+      on:change={(e) => updatePrimitiveField( (v) => (char_age = v), "age", Number(e.currentTarget.value))}
+      />
+    </div>
+    <div class="stat-row">
+      <span>Height (cm)</span>
+      <input
+      class="num-input"
+      type="number"
+      value={char_height}
+      on:change={(e) => updatePrimitiveField( (v) => (char_height = v), "height", Number(e.currentTarget.value))}
+      />
+    </div>
+    <div class="stat-row">
+      <span>Inspiration</span>
+      <input
+      class="num-input"
+      type="number"
+      value={char_inspiration}
+      on:change={(e) => updatePrimitiveField( (v) => (char_inspiration = v), "inspiration", Number(e.currentTarget.value))}
+      />
+    </div>
+    <div class="stat-row">
+      <span>Alignment</span>
+      <input
+      class="num-input"
+      type="text"
+      value={char_alignment}
+      on:change={(e) => updatePrimitiveField( (v) => (char_alignment = v), "alignment", String(e.currentTarget.value))}
+      />
+    </div>
     <div class="stat-row">
       <span>Initiative</span>
       <span class="mod">{formatModifier(getAbilityModifier(char_abilities["dex"]))}</span>
+    </div>
+  </div>
+
+  <!-- DEATH SAVES -->  
+  <div class="deathsaves-block">
+    <span class="deathsaves-title">Death Saves</span>
+
+    <div class="deathsaves-row">
+      <span class="deathsaves-label">Successes</span>
+      {#each char_deathsaves.successes as success, index}
+        <input
+          type="checkbox"
+          checked={success}
+          on:change={() => toggleDeathSave("successes", index)}
+        />
+      {/each}
+    </div>
+
+    <div class="deathsaves-row">
+      <span class="deathsaves-label">Failures</span>
+      {#each char_deathsaves.failures as failure, index}
+        <input
+          type="checkbox"
+          checked={failure}
+          on:change={() => toggleDeathSave("failures", index)}
+        />
+      {/each}
     </div>
   </div>
 
