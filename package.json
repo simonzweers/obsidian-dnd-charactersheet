@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-dnd-charactersheet",
-	"version": "1.2.1",
+	"version": "1.2.2",
 	"description": "This is a plugin that allows you to view charactersheets",
 	"main": "main.js",
 	"scripts": {
