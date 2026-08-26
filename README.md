@@ -51,4 +51,4 @@ Below you can see an example of the layout with a simple character.
 - Search web for spell name and add option to automatically add a link
 - Add buttons for processing damage
 - Add check for `dnd_character: true` to prevent loading UI if frontmatter is not for a DnD character
-
+- Add Github artifact attestations
