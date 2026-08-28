@@ -60,7 +60,6 @@ Below you can see an example of the layout with a simple character.
 
 
 ## TODO
-- Fix bug where editing fist row of Attack/Spellcasting delets fields in second row
 - Search web for spell name and add option to automatically add a link
 - Add buttons for processing damage
 - Add check for `dnd_character: true` to prevent loading UI if frontmatter is not for a DnD character
