@@ -9,6 +9,19 @@ This is a simple DnD charactersheet viewer/editor. It enables the creation and v
 - Embed character sheet directly into file properties, to allow for additional writing inside the file
 - The ability to add links to saved spells, to allow for easy lookup and opening them in your browser
 
+## Motivation
+
+Before I started writing this, I've wanted a plugin for obsidian which enabled me to interact with charactersheets.
+For writing lore, backstory or taking notes, obsidian already works really well, which is why I've already been using it for this.
+I was really surprised when I tried to search for a charactersheet plugin and there were none which fit my needs.
+I found a couple which were promising, which I didn't use for the following reasons:
+
+* [Character Sheets by Grayvox](https://community.obsidian.md/plugins/character-sheets): This just creates markdown files with no special layout. I wanted a UI to view/edit my stats.
+* [DnD Beyond Importer](https://community.obsidian.md/plugins/dndbeyond-importer): Promising, but it needs DnD Beyond to function. I wanted something completely standalone inside obsidian.
+* [DnD HP Tracker](https://community.obsidian.md/plugins/dnd-hp-tracker): Really useful tool, but I it does not show full charactersheets.
+
+This is why I built **DnD Character sheet Tool**. A full interface and completely independent tool for creating/viewing/editing character sheets.
+
 ## Installation
 
 ### Install from Obsidian
