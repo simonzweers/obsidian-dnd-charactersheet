@@ -67,6 +67,5 @@ Below you can see an example of the layout with a simple character.
 
 ## TODO
 - Add buttons for processing damage
-- Add check for `dnd_character: true` to prevent loading UI if frontmatter is not for a DnD character
 - Add Github artifact attestations
 - Put D&D in the plugin description to make it easier to find
