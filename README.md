@@ -66,4 +66,5 @@ Below you can see an example of the layout with a simple character.
 
 
 ## TODO
-![Why is it empty?](http://https://imgflip.com/i/80iisu)
+
+Empty...
