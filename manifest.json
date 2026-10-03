@@ -3,7 +3,7 @@
 	"name": "DnD Character Sheet Tool",
 	"version": "1.2.2",
 	"minAppVersion": "0.15.0",
-	"description": "Create, Edit and View DnD charactersheets.",
+	"description": "Create, Edit and View D&D charactersheets.",
 	"author": "Simon Zweers",
 	"authorUrl": "https://github.com/simonzweers",
 	"isDesktopOnly": true

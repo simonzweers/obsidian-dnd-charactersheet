@@ -1,6 +1,6 @@
 # Obsidian: DnD Character Sheet Tool
 
-This is a simple DnD charactersheet viewer/editor. It enables the creation and viewing of charactersheets directly inside of Obsidian.
+This is a simple D&D charactersheet viewer/editor. It enables the creation and viewing of charactersheets directly inside of Obsidian.
 
 ## Key features
 
