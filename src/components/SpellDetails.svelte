@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { type App, Component, MarkdownRenderer } from "obsidian";
 	import { onDestroy } from "svelte";
+	import { findDice } from "../rules";
 	import { getSpellDetails, type SpellDetails } from "../spellLookup";
 	import type { Spell } from "../types";
 
@@ -38,14 +39,40 @@
 		return d.concentration ? `Concentration, ${d.duration}` : capitalize(d.duration);
 	}
 
+	// Wraps dice expressions ("8d6", "1d8 + 4") in the rendered text in a highlight span.
+	function highlightDice(root: HTMLElement) {
+		const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+		const textNodes: Text[] = [];
+		while (walker.nextNode()) textNodes.push(walker.currentNode as Text);
+
+		for (const node of textNodes) {
+			if (node.parentElement?.closest("code, pre, .spell-dice")) continue;
+			const text = node.data;
+			const matches = findDice(text);
+			if (matches.length === 0) continue;
+
+			const fragment = document.createDocumentFragment();
+			let last = 0;
+			for (const match of matches) {
+				const start = match.index ?? 0;
+				fragment.append(text.slice(last, start));
+				fragment.createSpan({ cls: "spell-dice", text: match[0] });
+				last = start + match[0].length;
+			}
+			fragment.append(text.slice(last));
+			node.replaceWith(fragment);
+		}
+	}
+
 	// Svelte action: render Open5e's markdown text with Obsidian's renderer.
 	function markdown(el: HTMLElement, text: string) {
-		const render = (md: string) => {
+		const render = async (md: string) => {
 			el.empty();
-			void MarkdownRenderer.render(app, md, el, "", renderOwner);
+			await MarkdownRenderer.render(app, md, el, "", renderOwner);
+			highlightDice(el);
 		};
-		render(text);
-		return { update: render };
+		void render(text);
+		return { update: (md: string) => void render(md) };
 	}
 </script>
 

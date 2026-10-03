@@ -325,3 +325,12 @@
 	color: var(--text-muted);
 	font-size: var(--font-smallest);
 }
+
+.spell-dice {
+	font-weight: bold;
+	color: var(--text-accent);
+	background-color: var(--background-modifier-hover);
+	border-radius: 4px;
+	padding: 0 3px;
+	white-space: nowrap;
+}
