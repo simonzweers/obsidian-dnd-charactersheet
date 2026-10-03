@@ -249,6 +249,13 @@
   color: var(--text-muted);
 }
 
+.hp-damage-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
 .attack-properties-row {
   display: flex;
   flex-wrap: wrap;
