@@ -92,6 +92,7 @@
 				{save}
 				field="inventory"
 				placeholder="New item"
+				editable
 				bind:items={char_inventory}
 			/>
 		</div>
