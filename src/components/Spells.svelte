@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Notice } from "obsidian";
+	import { type App, Notice } from "obsidian";
 	import { swapUp, type Frontmatter, type Save } from "../frontmatter";
 	import {
 		MAX_SPELL_LEVEL,
@@ -7,8 +7,11 @@
 		getSpellAttackBonus,
 		getSpellSaveDC,
 	} from "../rules";
+	import { findSpell, type SpellMatch } from "../spellLookup";
 	import type { CharSpells, Spell, SpellLevel } from "../types";
+	import { pickSpellMatch } from "./SpellMatchModal";
 
+	export let app: App;
 	export let save: Save;
 	export let char_spells: CharSpells;
 	export let char_spellcasting: string;
@@ -85,16 +88,48 @@
 			return;
 		}
 
+		await setSpellLink(levelKey, index, text);
+		new Notice("Pasted link");
+	}
+
+	async function setSpellLink(levelKey: string, index: number, link: string) {
 		setList(
 			levelKey,
-			getList(levelKey).map((s, i) => (i === index ? { ...s, link: text } : s)),
+			getList(levelKey).map((s, i) => (i === index ? { ...s, link } : s)),
 		);
 		await save((fm) => {
 			const list = getFmList(fm, levelKey);
-			if (list) list[index].link = text;
+			if (list) list[index].link = link;
 		});
+	}
 
-		new Notice("Pasted link");
+	// --- Open5e: look up the spell and store a link to its page ---
+	async function findSpellLink(levelKey: string, index: number) {
+		const spell = getList(levelKey)[index];
+
+		let matches: SpellMatch[];
+		try {
+			matches = await findSpell(spell.name);
+		} catch (err) {
+			console.error(err);
+			new Notice("Open5e lookup failed");
+			return;
+		}
+
+		if (matches.length === 0) {
+			new Notice(`No Open5e match for ${spell.name}`);
+			return;
+		}
+
+		// Matches are sorted newest SRD first, so the same spell in both SRDs picks SRD 5.2.
+		const sameSpell = matches.every(
+			(m) => m.name.toLowerCase() === matches[0].name.toLowerCase(),
+		);
+		const match = sameSpell ? matches[0] : await pickSpellMatch(app, matches);
+		if (!match) return;
+
+		await setSpellLink(levelKey, index, match.url);
+		new Notice(`Linked to Open5e: ${match.name}`);
 	}
 
 	// --- Clipboard: copy link from a spell ---
@@ -242,6 +277,11 @@
 				<div class="spell-actions">
 					<button
 						class="icon-btn"
+						title="Find on Open5e"
+						on:click={() => findSpellLink("cantrips", index)}>🔍</button
+					>
+					<button
+						class="icon-btn"
 						title="Paste link"
 						on:click={() => pasteSpellLink("cantrips", index)}>📋</button
 					>
@@ -320,6 +360,11 @@
 					/>
 					<span class="spell-name">{spell.name}</span>
 					<div class="spell-actions">
+						<button
+							class="icon-btn"
+							title="Find on Open5e"
+							on:click={() => findSpellLink(levelKey, index)}>🔍</button
+						>
 						<button
 							class="icon-btn"
 							title="Paste link"

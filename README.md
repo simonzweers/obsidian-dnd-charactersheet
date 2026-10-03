@@ -8,6 +8,11 @@ This is a simple DnD charactersheet viewer/editor. It enables the creation and v
 - Automatically calculate "calculated" fields such as Initiative, HP, Skills
 - Embed character sheet directly into file properties, to allow for additional writing inside the file
 - The ability to add links to saved spells, to allow for easy lookup and opening them in your browser
+- Look up spells on [Open5e](https://open5e.com) with the 🔍 button to add a link automatically (SRD spells only)
+
+### Network use
+
+The plugin only contacts the internet when you press the 🔍 button next to a spell. It then sends the spell name to the [Open5e API](https://api.open5e.com) (`api.open5e.com`) to find a matching page. No other data is sent.
 
 ## Motivation
 
@@ -60,7 +65,6 @@ Below you can see an example of the layout with a simple character.
 
 
 ## TODO
-- Search web for spell name and add option to automatically add a link
 - Add buttons for processing damage
 - Add check for `dnd_character: true` to prevent loading UI if frontmatter is not for a DnD character
 - Add Github artifact attestations

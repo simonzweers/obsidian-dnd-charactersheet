@@ -112,6 +112,7 @@
 	</div>
 
 	<Spells
+		{app}
 		{save}
 		bind:char_spells
 		bind:char_spellcasting
