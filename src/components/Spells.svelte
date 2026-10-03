@@ -9,6 +9,7 @@
 	} from "../rules";
 	import { findSpell, type SpellMatch } from "../spellLookup";
 	import type { CharSpells, Spell, SpellLevel } from "../types";
+	import SpellDetails from "./SpellDetails.svelte";
 	import { pickSpellMatch } from "./SpellMatchModal";
 
 	export let app: App;
@@ -28,6 +29,15 @@
 
 	let newCantripName = "";
 	let newSpellNames: Record<string, string> = {}; // keyed by levelKey
+
+	// Spells whose info panel is open, keyed by "<levelKey>:<name>" so it survives reordering.
+	let expanded = new Set<string>();
+	const expandKey = (levelKey: string, spell: Spell) => `${levelKey}:${spell.name}`;
+	function toggleExpanded(levelKey: string, spell: Spell) {
+		const key = expandKey(levelKey, spell);
+		if (!expanded.delete(key)) expanded.add(key);
+		expanded = expanded;
+	}
 
 	// always returns a valid SpellLevel, even if the character has no data for it yet
 	function getLevel(spells: CharSpells, levelKey: string): SpellLevel {
@@ -121,7 +131,7 @@
 			return;
 		}
 
-		// Matches are sorted newest SRD first, so the same spell in both SRDs picks SRD 5.2.
+		// Matches are sorted by preferred SRD, so the same spell in both SRDs picks the 2014 rules.
 		const sameSpell = matches.every(
 			(m) => m.name.toLowerCase() === matches[0].name.toLowerCase(),
 		);
@@ -273,6 +283,12 @@
 	<ul class="spell-list">
 		{#each char_spells.cantrips as cantrip, index}
 			<li class="spell-row">
+				<button
+					class="icon-btn"
+					title="Show spell info"
+					on:click={() => toggleExpanded("cantrips", cantrip)}
+					>{expanded.has(expandKey("cantrips", cantrip)) ? "▾" : "▸"}</button
+				>
 				<span class="spell-name">{cantrip.name}</span>
 				<div class="spell-actions">
 					<button
@@ -307,6 +323,9 @@
 						on:click={() => removeSpell("cantrips", index)}>✕</button
 					>
 				</div>
+				{#if expanded.has(expandKey("cantrips", cantrip))}
+					<SpellDetails {app} spell={cantrip} />
+				{/if}
 			</li>
 		{/each}
 	</ul>
@@ -352,6 +371,12 @@
 		<ul class="spell-list">
 			{#each level.learned as spell, index}
 				<li class="spell-row">
+					<button
+						class="icon-btn"
+						title="Show spell info"
+						on:click={() => toggleExpanded(levelKey, spell)}
+						>{expanded.has(expandKey(levelKey, spell)) ? "▾" : "▸"}</button
+					>
 					<input
 						type="checkbox"
 						title="Prepared"
@@ -392,6 +417,9 @@
 							on:click={() => removeSpell(levelKey, index)}>✕</button
 						>
 					</div>
+					{#if expanded.has(expandKey(levelKey, spell))}
+						<SpellDetails {app} {spell} />
+					{/if}
 				</li>
 			{/each}
 		</ul>
