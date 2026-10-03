@@ -1,8 +1,7 @@
 import type { App, TFile } from "obsidian";
+import type { DndCharacterFrontmatter } from "./types";
 
-// Frontmatter is loosely typed on purpose: the note may contain anything.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Frontmatter = any;
+export type Frontmatter = DndCharacterFrontmatter;
 export type Save = (fn: (frontmatter: Frontmatter) => void) => Promise<void>;
 
 /** Returns a function that applies `fn` to the frontmatter of `file`. */

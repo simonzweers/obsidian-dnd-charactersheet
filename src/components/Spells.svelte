@@ -54,7 +54,7 @@
 	function getFmList(fm: Frontmatter, levelKey: string): Spell[] | undefined {
 		return levelKey === "cantrips"
 			? fm.spells?.cantrips
-			: fm.spells?.[levelKey]?.learned;
+			: (fm.spells?.[levelKey] as SpellLevel | undefined)?.learned;
 	}
 
 	// Replaces the list for `levelKey` in the local state.
@@ -68,10 +68,10 @@
 	}
 
 	// Makes sure fm.spells[levelKey] exists before writing to it.
-	function ensureFmLevel(fm: Frontmatter, levelKey: string) {
-		if (!fm.spells) fm.spells = {};
+	function ensureFmLevel(fm: Frontmatter, levelKey: string): SpellLevel {
+		if (!fm.spells) fm.spells = { cantrips: [] };
 		if (!fm.spells[levelKey]) fm.spells[levelKey] = emptyLevel();
-		return fm.spells[levelKey];
+		return fm.spells[levelKey] as SpellLevel;
 	}
 
 	// --- Prepare toggle (leveled spells only) ---
@@ -204,7 +204,7 @@
 		newCantripName = "";
 
 		await save((fm) => {
-			if (!fm.spells) fm.spells = {};
+			if (!fm.spells) fm.spells = { cantrips: [] };
 			if (!fm.spells.cantrips) fm.spells.cantrips = [];
 			fm.spells.cantrips.push(spell);
 		});

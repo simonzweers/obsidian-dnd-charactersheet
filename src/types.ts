@@ -77,4 +77,4 @@ export interface DndCharacterFrontmatter {
 	spells?: CharSpells;
 	spellcasting?: string;
 	[key: string]: unknown; // fallback for any other frontmatter keys not explicitly modeled
-};
+}

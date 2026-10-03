@@ -8,7 +8,7 @@
 		char_hp = { ...char_hp, [hpType]: newHP };
 
 		await save((fm) => {
-			if (!fm.hp) fm.hp = {};
+			if (!fm.hp) fm.hp = { current: 0, max: 0, temp: 0 };
 			fm.hp[hpType] = newHP;
 		});
 	}

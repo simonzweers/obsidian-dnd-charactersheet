@@ -30,7 +30,7 @@
 
 		await save((fm) => {
 			if (!fm.attacks) return;
-			fm.attacks[index][field] = value;
+			fm.attacks[index] = { ...fm.attacks[index], [field]: value };
 		});
 	}
 

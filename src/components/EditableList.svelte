@@ -20,8 +20,9 @@
 		newItem = "";
 
 		await save((fm) => {
-			if (!fm[field]) fm[field] = [];
-			fm[field].push(item);
+			const list = fm[field] ?? [];
+			list.push(item);
+			fm[field] = list;
 		});
 	}
 
@@ -41,7 +42,8 @@
 		items = updated;
 
 		await save((fm) => {
-			if (fm[field]) swapUp(fm[field], index);
+			const list = fm[field];
+			if (list) swapUp(list, index);
 		});
 	}
 
@@ -49,7 +51,8 @@
 		items = items.map((t, i) => (i === index ? value : t));
 
 		await save((fm) => {
-			if (fm[field]) fm[field][index] = value;
+			const list = fm[field];
+			if (list) list[index] = value;
 		});
 	}
 </script>

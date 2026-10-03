@@ -9,8 +9,8 @@
 		char_hit_dice = { ...char_hit_dice, [field]: value };
 
 		await save((fm) => {
-			if (!fm.hit_dice) fm.hit_dice = { total: 1, used: 0, die: "d8" };
-			fm.hit_dice[field] = value;
+			const hitDice = fm.hit_dice ?? { total: 1, used: 0, die: "d8" };
+			fm.hit_dice = { ...hitDice, [field]: value };
 		});
 	}
 </script>
