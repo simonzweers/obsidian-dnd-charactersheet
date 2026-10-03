@@ -73,10 +73,12 @@ export function getSpellAttackBonus(
 	return proficiencyBonus + getAbilityModifier(abilities[scAbility]);
 }
 
-const DICE_PATTERN = /\b\d*d(?:4|6|8|10|12|20|100)\b(?:\s*[+\-−]\s*\d+\b)?/;
-
 /** All dice expressions in `text`, like "8d6", "d20" or "1d8 + 4". */
-export function findDice(text: string) {
-	// A fresh global regex per call, so no lastIndex state leaks between calls.
-	return [...text.matchAll(new RegExp(DICE_PATTERN.source, "g"))];
+export function findDice(text: string): RegExpExecArray[] {
+	// A regex literal is a fresh object on every call, so no lastIndex state leaks between calls.
+	const regex = /\b\d*d(?:4|6|8|10|12|20|100)\b(?:\s*[+\-−]\s*\d+\b)?/g;
+	const matches: RegExpExecArray[] = [];
+	let match: RegExpExecArray | null;
+	while ((match = regex.exec(text)) !== null) matches.push(match);
+	return matches;
 }

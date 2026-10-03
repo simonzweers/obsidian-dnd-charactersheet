@@ -35,7 +35,7 @@ class SpellMatchModal extends SuggestModal<SpellMatch> {
 
 	onClose() {
 		// onChooseSuggestion runs after onClose, so wait a tick before treating this as a dismiss.
-		setTimeout(() => {
+		window.setTimeout(() => {
 			if (!this.chosen) this.resolve(null);
 		}, 0);
 	}
